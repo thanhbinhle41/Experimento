@@ -1,4 +1,6 @@
 import './App.css';
+import { BrowserRouter } from "react-router-dom";
+import AppRoute from "./routers";
 import BarChart from './components/BarChart/BarChart';
 import { faker } from '@faker-js/faker';
 import LineChart from './components/LineChart/LineChart';
@@ -48,21 +50,24 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <BarChart 
-        type="horizontal" 
-        title="chart 1"
-        labels={labels}
-        columns={columns}
-        options={options}
-      />
-      <LineChart
-        title="chart 2"
-        labels={labels}
-        columns={columns2}
-        options={options}
-      />
-    </div>
+    <BrowserRouter>
+      <AppRoute />
+    </BrowserRouter>
+    // <div className="App">
+    //   <BarChart 
+    //     type="horizontal" 
+    //     title="chart 1"
+    //     labels={labels}
+    //     columns={columns}
+    //     options={options}
+    //   />
+    //   <LineChart
+    //     title="chart 2"
+    //     labels={labels}
+    //     columns={columns2}
+    //     options={options}
+    //   />
+    // </div>
   );
 }
 
