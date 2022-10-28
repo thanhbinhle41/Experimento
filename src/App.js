@@ -1,52 +1,60 @@
-import './App.css';
+import "./App.css";
 import { BrowserRouter } from "react-router-dom";
 import AppRoute from "./routers";
-import BarChart from './components/BarChart/BarChart';
-import { faker } from '@faker-js/faker';
-import LineChart from './components/LineChart/LineChart';
+import BarChart from "./components/BarChart/BarChart";
+import { faker } from "@faker-js/faker";
+import LineChart from "./components/LineChart/LineChart";
+import "antd/dist/antd.css";
 
 function App() {
-
-  const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+  const labels = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+  ];
 
   const columns = [
     {
-      label: 'Dataset 1',
+      label: "Dataset 1",
       data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
-      backgroundColor: 'rgb(255, 99, 132)'
+      backgroundColor: "rgb(255, 99, 132)",
     },
     {
-      label: 'Dataset 2',
+      label: "Dataset 2",
       data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
-      backgroundColor: 'rgb(75, 192, 192)'
+      backgroundColor: "rgb(75, 192, 192)",
     },
     {
-      label: 'Dataset 3',
+      label: "Dataset 3",
       data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
-      backgroundColor: 'rgb(53, 162, 235)'
+      backgroundColor: "rgb(53, 162, 235)",
     },
   ];
 
   const columns2 = [
     {
-      label: 'Dataset 1',
+      label: "Dataset 1",
       data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
-      borderColor: 'rgb(255, 99, 132)',
-      backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      borderColor: "rgb(255, 99, 132)",
+      backgroundColor: "rgba(255, 99, 132, 0.5)",
       fill: true,
     },
     {
-      label: 'Dataset 2',
+      label: "Dataset 2",
       data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
-      borderColor: 'rgb(53, 162, 235)',
-      backgroundColor: 'rgba(53, 162, 235, 0.5)',
+      borderColor: "rgb(53, 162, 235)",
+      backgroundColor: "rgba(53, 162, 235, 0.5)",
       fill: true,
     },
   ];
 
-  const options={
+  const options = {
     isStacked: false,
-    position: 'top'
+    position: "top",
   };
 
   return (
@@ -54,8 +62,8 @@ function App() {
       <AppRoute />
     </BrowserRouter>
     // <div className="App">
-    //   <BarChart 
-    //     type="horizontal" 
+    //   <BarChart
+    //     type="horizontal"
     //     title="chart 1"
     //     labels={labels}
     //     columns={columns}
