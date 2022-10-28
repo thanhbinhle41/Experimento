@@ -79,7 +79,7 @@ export const TableData = () => {
   return (
     <div>
         <Card
-            title="Dữ liệu khoảng cách"
+            title="Bảng kết quả"
             actions={[
                 <Button type="primary" onClick={() => {}}>Vẽ biểu đồ</Button>
             ]}

@@ -15,7 +15,8 @@ const Publisher = () => {
         <Card
             title="Dữ liệu khoảng cách"
             actions={[
-                <Button type="primary" onClick={() => {}}>Gửi</Button>
+                <Button type="primary" onClick={() => {}}>Gửi</Button>,
+                <Button type="primary" onClick={() => {}}>Gửi liên tục</Button>
             ]}
         >
             <Form {...layout} form={form} name="control-hooks" onFinish={() => {}}>
