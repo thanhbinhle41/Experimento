@@ -31,7 +31,7 @@ const AdminAuth = () => {
     <Form
       name="basic"
       labelCol={{ span: 8 }}
-      wrapperCol={{ span: 16 }}
+      wrapperCol={{ span: 8 }}
       onFinish={onFinish}
       onFinishFailed={onFinishFailed}
       autoComplete="off"

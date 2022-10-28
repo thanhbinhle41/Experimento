@@ -9,7 +9,6 @@ const AdminTable = () => {
   const dispatch = useDispatch();
 
   let dataExperiment = useSelector(dataExperimentSelector);
-  console.log(dataExperiment);
   let dataTable = [...dataExperiment];
   dataTable = dataTable.map((data, index) => ({ ...data, key: data.id }));
 
