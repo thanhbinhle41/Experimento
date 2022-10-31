@@ -1,50 +1,111 @@
-import React from 'react';
+import { React, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import styles from "./Connector.module.scss";
-import { Button, Form, Input, Card } from 'antd';
+import { Button, Form, Input, Card } from "antd";
+import { authSliceActions } from "../../../features/auth/services/authSlice";
+import { connectionStatusSelector, isSubedSelector } from "../../../services/mqtt/mqttSlice";
 
 
-const Connector = () => {
-    const layout = {
-        labelCol: { span: 4 },
-        wrapperCol: { span: 20 },
+const Connector = ({mqttConnect, mqttDisconect, mqttSub, mqttUnSub}) => {
+  const dispatch = useDispatch()
+  const [topic, setTopic] = useState("");
+  
+  const connectionStatus = useSelector(connectionStatusSelector);
+  const isSubed = useSelector(isSubedSelector);
+
+  const layout = {
+    labelCol: { span: 4 },
+    wrapperCol: { span: 20 },
+  };
+  const [form] = Form.useForm();
+
+  const onFinish = (values) => {
+    setTopic(values.nameComputer + "_" + values.studentID);
+    dispatch(authSliceActions.setCurrentUserID(values.nameComputer + "_" + values.studentID));
+    const host = 'broker.emqx.io';
+    const port = 8083;
+    const url = `ws://${host}:${port}/mqtt`;
+    const options = {
+      keepalive: 30,
+      protocolId: 'MQTT',
+      protocolVersion: 4,
+      clean: true,
+      reconnectPeriod: 1000,
+      connectTimeout: 30 * 1000,
+      will: {
+        topic: 'WillMsg',
+        payload: 'Connection Closed abnormally..!',
+        qos: 0,
+        retain: false
+      },
+      rejectUnauthorized: false
     };
+    options.clientId = values.studentID;
+    mqttConnect(url, options);
+  };
 
-    const tailLayout = {
-        wrapperCol: {
-            offset: 4,
-            span: 20,
-        },
-    };
+  const onReset = () => {
+    form.resetFields();
+  };
 
-    const [form] = Form.useForm();
 
-    const onFinish = (values) => {
-        console.log(values);
-    };
-    const onReset = () => {
-        form.resetFields();
-    };
+  useEffect(() => {
+    if (connectionStatus === "Connected" && isSubed === false) {
+      mqttSub({topic: topic, qos: 0});
+    }
+    else if (connectionStatus === "Disconnected" && isSubed === true) {
+      mqttUnSub({topic: topic, qos: 0});
+    }
+  }, [connectionStatus]);
 
-    return (
-        <div className={styles.container}>
-        <Card
-            title="Đăng nhập"
-            actions={[
-                <Button type="primary" onClick={() => {}}>Kết nối</Button>,
-                <Button danger onClick={onReset}>Ngắt kết nối</Button>
-            ]}
-        >
-            <Form {...layout} form={form} name="control-hooks" onFinish={onFinish}>
-                <Form.Item name="name_computer" label="Tên máy" rules={[{required: true}]}>
-                    <Input placeholder="T6_Ca1_M1"/>
-                </Form.Item>
-                <Form.Item name="student_id" label="Mã sinh viên" rules={[{required: true}]}>
-                    <Input placeholder="B19DCCN067"/>
-                </Form.Item>
-            </Form>
-        </Card>
-        </div>
-    )
-}
+  // useEffect(() => {
+  //   const topic = payload.topic;
+  //   if (topic) {
+  //     const message = payload.message;
+  //     dispatch(
+  //       dataAnalyzingActions.addVoltageByID({
+  //         ID: currentID,
+  //         voltage: message,
+  //       })
+  //     );
+  //   }
+  // }, [payload]);
+
+
+  return (
+    <div className={styles.container}>
+      <Card
+        title="Đăng nhập"
+        actions={[
+          <Button danger onClick={onReset}>
+            Disconnect
+          </Button>,
+        ]}
+      >
+        <Form {...layout} form={form} name="control-hooks" onFinish={onFinish}>
+          <Form.Item
+            name="nameComputer"
+            label="Tên máy"
+            rules={[{ required: true }]}
+          >
+            <Input placeholder="T6_Ca1_M1" />
+          </Form.Item>
+          <Form.Item
+            name="studentID"
+            label="Mã sinh viên"
+            rules={[{ required: true }]}
+          >
+            <Input placeholder="B19DCCN067" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              {connectionStatus}
+            </Button>
+          </Form.Item>
+        </Form>
+      </Card>
+    </div>
+  );
+};
 
 export default Connector;
