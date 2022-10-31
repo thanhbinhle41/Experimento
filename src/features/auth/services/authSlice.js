@@ -5,7 +5,7 @@ const authSlice = createSlice({
   initialState: {
     usernameAdmin: "admin",
     passwordAdmin: "123456",
-    isAdmin: false,
+    isAdmin: true,
     studentID: [], // [{}]
     currentID: null,
   },
@@ -16,7 +16,7 @@ const authSlice = createSlice({
     },
     setCurrentUserID: (state, action) => {
       state.currentID = action.payload;
-    }
+    },
   },
 });
 
