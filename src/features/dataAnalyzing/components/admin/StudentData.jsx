@@ -7,7 +7,10 @@ import StudentTable from "./StudentTable";
 const StudentData = (props) => {
   const { id, dataExperiment } = props;
   let dataTable = dataExperiment.filter((data) => data.id === id);
-  dataTable = dataTable[0].dataFromCOM;
+  dataTable = dataTable[0].dataFromCOM.map((data) => ({
+    ...data,
+    key: data.time,
+  }));
   return (
     <>
       <Row>

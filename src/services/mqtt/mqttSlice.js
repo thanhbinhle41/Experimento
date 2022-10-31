@@ -1,28 +1,28 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const mqttSlice = createSlice({
-    name: 'mqtt',
-    initialState: {
-        client: null,
-        isSubed: false,
-        mqttPayload: {},
-        connectionStatus: "Connect",
+  name: "mqtt",
+  initialState: {
+    client: null,
+    isSubed: false,
+    mqttPayload: null,
+    connectionStatus: "Connect",
+  },
+  reducers: {
+    setClient: (state, action) => {
+      state.client = action.payload;
     },
-    reducers: {
-        setClient: (state, action) => {
-          state.client = action.payload;
-        },
-        setIsSubed: (state, action) => {
-          state.isSubed = action.payload;
-        },
-        setMqttPayload: (state, action) => {
-          state.mqttPayload = action.payload;
-        },
-        setConnectionStatus: (state, action) => {
-          state.connectionStatus = action.payload;
-        },
-      },
-})
+    setIsSubed: (state, action) => {
+      state.isSubed = action.payload;
+    },
+    setMqttPayload: (state, action) => {
+      state.mqttPayload = action.payload;
+    },
+    setConnectionStatus: (state, action) => {
+      state.connectionStatus = action.payload;
+    },
+  },
+});
 
 export default mqttSlice;
 
