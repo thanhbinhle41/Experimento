@@ -1,16 +1,27 @@
-import { Button, Table, Tag } from "antd";
+import { Button, Card, Table, Tag } from "antd";
 import ColumnGroup from "antd/lib/table/ColumnGroup";
 import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { dataExperimentSelector } from "../../services/dataAnalyzingSlice";
 import { dataAnalyzingActions } from "../../services/dataAnalyzingSlice.js";
+import StudentData from "./StudentData";
 
-const AdminTable = () => {
+const AdminTable = (props) => {
+  const { isShowStudentData, setIsShowStudentData } = props;
+
   const dispatch = useDispatch();
 
   let dataExperiment = useSelector(dataExperimentSelector);
   let dataTable = [...dataExperiment];
   dataTable = dataTable.map((data, index) => ({ ...data, key: data.id }));
+
+  const handleShowBtnOnClick = (id) => {
+    console.log(id);
+    const arrWithStatusChange = isShowStudentData.map((item) =>
+      item.id === id ? { ...item, isShowData: !item.isShowData } : item
+    );
+    setIsShowStudentData(arrWithStatusChange);
+  };
 
   const columns = [
     // {
@@ -35,11 +46,20 @@ const AdminTable = () => {
         </>
       ),
     },
-    {
-      title: "Action",
-      key: "action",
-      render: () => <Button type="primary">Xem kết quả</Button>,
-    },
+    Table.EXPAND_COLUMN,
+    // {
+    //   title: "Action",
+    //   key: "action",
+    //   render: (_, record) => (
+    //     <Button
+    //       id={record.id}
+    //       onClick={() => handleShowBtnOnClick(record.id)}
+    //       type="primary"
+    //     >
+    //       Xem kết quả
+    //     </Button>
+    //   ),
+    // },
   ];
 
   const handleOnChangeSelection = (e) => {
@@ -56,6 +76,27 @@ const AdminTable = () => {
       }}
       dataSource={dataTable}
       columns={columns}
+      rowKey={(record) => record.id}
+      expandable={{
+        expandIcon: ({ expanded, onExpand, record }) =>
+          expanded ? (
+            <Button type="primary" onClick={(e) => onExpand(record, e)}>
+              Xem kết quả
+            </Button>
+          ) : (
+            <Button type="primary" onClick={(e) => onExpand(record, e)}>
+              Xem kết quả
+            </Button>
+          ),
+        expandedRowRender: (record) => (
+          <Card title={`Thông tin của ${record.id}`} key={record.id}>
+            <StudentData id={record.id} dataExperiment={dataExperiment} />
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <Button type="primary">Xuất file</Button>
+            </div>
+          </Card>
+        ),
+      }}
     ></Table>
   );
 };
