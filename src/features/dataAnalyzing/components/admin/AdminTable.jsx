@@ -24,11 +24,6 @@ const AdminTable = (props) => {
   };
 
   const columns = [
-    // {
-    //   title: "Chọn",
-    //   dataIndex: "isChosen",
-    //   key: "isChosen",
-    // },
     {
       title: "Tên máy",
       dataIndex: "id",
@@ -91,9 +86,6 @@ const AdminTable = (props) => {
         expandedRowRender: (record) => (
           <Card title={`Thông tin của ${record.id}`} key={record.id}>
             <StudentData id={record.id} dataExperiment={dataExperiment} />
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <Button type="primary">Xuất file</Button>
-            </div>
           </Card>
         ),
       }}
