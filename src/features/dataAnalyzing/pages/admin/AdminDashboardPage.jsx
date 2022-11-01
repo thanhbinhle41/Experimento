@@ -21,9 +21,17 @@ const AdminDashboardPage = () => {
 
   const [clientMqtt, setClientMqtt] = useState(null);
   const [timeOutFuncArr, setTimeOutFuncArr] = useState([]);
+  const [isShowStudentData, setIsShowStudentData] = useState([]);
 
   const findTimeOutById = (id) => {
     return timeOutFuncArr.find((data) => data.id === id);
+  };
+
+  const findIsShowById = (id) => {
+    return (
+      isShowStudentData.length !== 0 &&
+      isShowStudentData.find((data) => data.id === id).isShowData
+    );
   };
 
   useEffect(() => {
@@ -31,13 +39,18 @@ const AdminDashboardPage = () => {
     const port = 8000;
     const client = mqttConnect(host, port);
     setClientMqtt(client);
-    // dispatch(mqttAction.setClient(client));
   }, []);
 
   useEffect(() => {
     setTimeOutFuncArr(
       dataExperiment.map((data) => ({
         id: data.id,
+      }))
+    );
+    setIsShowStudentData(
+      dataExperiment.map((data) => ({
+        id: data.id,
+        isShowData: false,
       }))
     );
   }, [dataExperiment.length]);
@@ -92,17 +105,23 @@ const AdminDashboardPage = () => {
   return (
     <>
       <Card title="Danh sách máy">
-        <AdminTable />
+        <AdminTable
+          isShowStudentData={isShowStudentData}
+          setIsShowStudentData={setIsShowStudentData}
+        />
       </Card>
       <Card title="Thông tin chi tiết">
-        {dataExperiment.map((student) => (
-          <div key={student.id}>
-            <StudentData id={student.id} dataExperiment={dataExperiment} />
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <Button type="primary">Xuất file</Button>
-            </div>
-          </div>
-        ))}
+        {dataExperiment.map(
+          (student) =>
+            findIsShowById(student.id) && (
+              <Card title={`Thông tin của ${student.id}`} key={student.id}>
+                <StudentData id={student.id} dataExperiment={dataExperiment} />
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <Button type="primary">Xuất file</Button>
+                </div>
+              </Card>
+            )
+        )}
       </Card>
     </>
   );

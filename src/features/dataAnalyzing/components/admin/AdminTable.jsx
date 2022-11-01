@@ -5,12 +5,22 @@ import { useSelector, useDispatch } from "react-redux";
 import { dataExperimentSelector } from "../../services/dataAnalyzingSlice";
 import { dataAnalyzingActions } from "../../services/dataAnalyzingSlice.js";
 
-const AdminTable = () => {
+const AdminTable = (props) => {
+  const { isShowStudentData, setIsShowStudentData } = props;
+
   const dispatch = useDispatch();
 
   let dataExperiment = useSelector(dataExperimentSelector);
   let dataTable = [...dataExperiment];
   dataTable = dataTable.map((data, index) => ({ ...data, key: data.id }));
+
+  const handleShowBtnOnClick = (id) => {
+    console.log(id);
+    const arrWithStatusChange = isShowStudentData.map((item) =>
+      item.id === id ? { ...item, isShowData: !item.isShowData } : item
+    );
+    setIsShowStudentData(arrWithStatusChange);
+  };
 
   const columns = [
     // {
@@ -38,7 +48,15 @@ const AdminTable = () => {
     {
       title: "Action",
       key: "action",
-      render: () => <Button type="primary">Xem kết quả</Button>,
+      render: (_, record) => (
+        <Button
+          id={record.id}
+          onClick={() => handleShowBtnOnClick(record.id)}
+          type="primary"
+        >
+          Xem kết quả
+        </Button>
+      ),
     },
   ];
 
@@ -56,6 +74,7 @@ const AdminTable = () => {
       }}
       dataSource={dataTable}
       columns={columns}
+      rowKey={(record) => record.id}
     ></Table>
   );
 };
