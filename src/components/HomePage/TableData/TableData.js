@@ -5,12 +5,21 @@ import { dataAnalyzingActions, dataExperimentSelector } from "../../../features/
 import { currentIDSelector } from "../../../features/auth/services/authSlice";
 import { mqttPayloadSelector } from "../../../services/mqtt/mqttSlice";
 
-export const TableData = () => {
+export const TableData = ({setIsDrawChart}) => {
 	const dispatch = useDispatch();
 
   const payloadMessage = useSelector(mqttPayloadSelector);
   const studentID = useSelector(currentIDSelector);
   const dataExperiment = useSelector(dataExperimentSelector);
+
+  let dataTable = dataExperiment.filter((data) => data.id === studentID);
+  if (dataTable) {
+    dataTable = dataTable[0]?.dataFromCOM.map((data, index) => ({
+      ...data,
+      id: index + 1,
+      key: index,
+    }));
+  }
 
 	// const [dataTable, setDataTable] = useState([]);
 
@@ -39,54 +48,46 @@ export const TableData = () => {
   ];
 
 	useEffect(() => {
-		console.log(payloadMessage);
-    if (payloadMessage.topic) {
-      const message = payloadMessage.message;
+		console.log("Socket return", payloadMessage);
+    if (payloadMessage?.message?.type === "live-data") {
+      const res = payloadMessage.message;
       dispatch(
         dataAnalyzingActions.addVoltageByID({
           ID: studentID,
-          voltage: message,
+          voltage: res.data.voltage,
+          time: res.data.time
         })
       );
-			// let tmpData = [];
-			// let listData = dataExperiment.filter(item => item.id === studentID);
-			// for (let i = 0; i < listData.length; i++) {
-			// 	tmpData.push({
-			// 		key: i,
-			// 		id: i+1,
-			// 		distance: listData.distance,
-			// 		voltage: listData.voltage,
-			// 		time: listData.time,
-			// 	})
-			// }
-			// setDataTable(tmpData);
+      // renderDataTable();
     }
   }, [payloadMessage]);
 
 
+  // const renderDataTable = () => {
+  //   let tmpData = [...dataTable];
+  //   let listData = dataExperiment.find(item => item.id === studentID)?.dataFromCOM;
+  //   if (listData === undefined) return;
+  //   let lengthData = listData.length - 1;
+  //   tmpData.push({
+  //     key: lengthData,
+  //     id: lengthData + 1,
+  //     distance: listData[lengthData].distance,
+  //     voltage: listData[lengthData].voltage,
+  //     time: listData[lengthData].time,
+  //   })
+  //   setDataTable(tmpData);
+  // }
 
-  const dataTable = [
-    {
-      key: "1",
-      id: 1,
-      distance: 12,
-      voltage: 3.52,
-      time: "28/10/2022 - 8:12:42",
-    },
-    {
-      key: "2",
-      id: 2,
-      distance: 2,
-      voltage: 0.32,
-      time: "28/10/2022 - 8:15:30",
-    },
-  ];
+  const onShowDataChart = () => {
+    setIsDrawChart(true);
+  }
+
   return (
     <div>
       <Card
         title="Bảng kết quả"
         actions={[
-          <Button type="primary" onClick={() => {}}>
+          <Button type="primary" onClick={onShowDataChart}>
             Vẽ biểu đồ
           </Button>,
         ]}
