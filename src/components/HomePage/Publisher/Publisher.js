@@ -18,11 +18,13 @@ const Publisher = ({ mqttPublish }) => {
 
     const onFinish = (values, type="once") => {
         dispatch(dataAnalyzingActions.setCurrentDistance(values.distance));
-        const context = {
-            "topic": `${currentUserID}/${type}`,
-            "payload": "x",
-        }
-        mqttPublish({topic: 'ALO123_B19DCCN067', qos: 0, payload: 'asd'});
+        const payload = JSON.stringify({
+            type: "get-live-data",
+            data: {
+                "distance": values.distance
+            }
+        });
+        mqttPublish({topic: currentUserID, qos: 0, payload});
     };
 
     return (
@@ -37,12 +39,10 @@ const Publisher = ({ mqttPublish }) => {
                 <Form.Item name="distance" label="Khoảng cách" rules={[{required: true}]}>
                     <Input placeholder="0 - 30cm"/>
                 </Form.Item>
-                <Form.Item>
-                    <div>
-                        <Button type="primary" htmlType='submit'>Gửi</Button>
-                        <Button type="primary" onClick={() => {}}>Gửi liên tục</Button>
-                    </div>
-                </Form.Item>
+                <div className={styles.group_btn}>
+                    <Button type="primary" htmlType='submit'>Gửi</Button>
+                    <Button type="primary" onClick={() => {}}>Gửi liên tục</Button>
+                </div>
             </Form>
         </Card>
         </div>

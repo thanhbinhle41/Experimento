@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getDateTime } from "../../../utils/utils";
 
 const dataAnalyzingSlice = createSlice({
   name: "dataAnalyzing",
@@ -38,7 +37,7 @@ const dataAnalyzingSlice = createSlice({
         isOnline: false,
       },
       {
-        id: "B19DCCNabc",
+        id: "TEST-B19DCCNabc",
         dataDistance: 30,
         dataFromCOM: [
           { distance: 0, voltage: 0, time: "19-09-2001" },
@@ -70,13 +69,27 @@ const dataAnalyzingSlice = createSlice({
       foundData.isChosen = !foundData.isChosen;
     },
     addVoltageByID: (state, action) => {
-      const { ID, voltage } = action.payload;
+      const { ID, voltage, time } = action.payload;
       const item = state.dataExperiment.find((i) => i.id === ID);
-      item.dataFromCOM.push({
+      let newData = {
         distance: state.currentDistance,
         voltage: voltage,
-        time: "2h19",
-      });
+        time: time,
+      }
+      if (item === undefined) {
+        state.dataExperiment.push({
+          id: ID,
+          distance: state.currentDistance,
+          dataFromCOM: [newData],
+          isChosen: false,
+          isOnline: false,
+        })
+        console.log("Create new data experiment")
+      }
+      else {
+        item.dataFromCOM.push(newData);
+        console.log("Add data experiment")
+      }
     },
     setCurrentDistance: (state, action) => {
       state.currentDistance = action.payload;

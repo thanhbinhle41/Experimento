@@ -7,33 +7,53 @@ import { mqttPayloadSelector } from "../../../services/mqtt/mqttSlice";
 import { dataAnalyzingActions, dataExperimentSelector } from "../../../features/dataAnalyzing/services/dataAnalyzingSlice";
 import { currentIDSelector } from "../../../features/auth/services/authSlice";
 
-export const ChartData = () => {
+export const ChartData = ({isDrawChart, setIsDrawChart}) => {
 
   const studentID = useSelector(currentIDSelector);
 
-  const dataExperiment = useSelector(dataExperimentSelector).filter(item => item.id === studentID);
+  const dataExperiment = useSelector(dataExperimentSelector);
+
+  const [labels, setLabels] = useState([]);
+
+  let dataTable = dataExperiment.filter((data) => data.id === studentID);
+  if (dataTable) {
+    dataTable = dataTable[0]?.dataFromCOM.map((data, index) => ({
+      ...data,
+      id: index + 1,
+      key: index,
+    }));
+  }
+
+  useEffect(() => {
+    if (isDrawChart) {
+      let newColums = [...columnsChart];
+      let newDataChart = dataTable.map((data) => data.voltage);
+      let newLabels = dataTable.map((data) => data.distance);
+      setLabels([...newLabels]);
+      newColums[0].data = newDataChart;
+      setColumnsChart([...newColums]);
+      setIsDrawChart(false);
+    }
+  }, [isDrawChart])
 
 
 
 
-
-  const [labels, setLabels] = useState(["1", "2"]);
-
-  const [columns, setColumns] = useState([
+  const [columnsChart, setColumnsChart] = useState([
     {
-      label: "Dataset 1",
-      data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
+      label: "Voltage",
+      data: [],
       borderColor: "rgb(255, 99, 132)",
       backgroundColor: "rgba(255, 99, 132, 0.5)",
       fill: true,
     },
-    {
-      label: "Dataset 2",
-      data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
-      borderColor: "rgb(53, 162, 235)",
-      backgroundColor: "rgba(53, 162, 235, 0.5)",
-      fill: true,
-    },
+    // {
+    //   label: "Voltage",
+    //   data: labels.map(() => faker.datatype.number({ min: -1000, max: 1000 })),
+    //   borderColor: "rgb(53, 162, 235)",
+    //   backgroundColor: "rgba(53, 162, 235, 0.5)",
+    //   fill: true,
+    // },
   ]);
 
   const options = {
@@ -45,7 +65,7 @@ export const ChartData = () => {
       <LineChart
         title="Line chart data"
         labels={labels}
-        columns={columns}
+        columns={columnsChart}
         options={options}
       />
     </Card>
