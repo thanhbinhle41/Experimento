@@ -96,6 +96,22 @@ const dataAnalyzingSlice = createSlice({
       );
       foundData.isOnline = false;
     },
+    addData: (state, action) => {
+      const { id, dataHistory } = action.payload;
+      const foundData = state.dataExperiment.find((data) => data.id === id);
+      if (foundData) {
+        foundData.dataFromCOM = dataHistory;
+      } else {
+        // new client
+        const newData = {
+          id,
+          dataFromCOM: dataHistory,
+          isOnline: false,
+          isChosen: false,
+        };
+        state.dataExperiment.push(newData);
+      }
+    },
   },
 });
 

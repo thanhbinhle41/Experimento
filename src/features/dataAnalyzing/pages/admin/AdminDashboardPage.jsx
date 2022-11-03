@@ -7,11 +7,21 @@ import {
   dataExperimentSelector,
 } from "../../services/dataAnalyzingSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { mqttConnect, mqttSub } from "../../../../services/mqtt/mqttUtil";
+import {
+  mqttConnect,
+  mqttSub,
+  mqttUnSub,
+  mqttPublish,
+} from "../../../../services/mqtt/mqttUtil";
 import {
   mqttAction,
   mqttPayloadSelector,
 } from "../../../../services/mqtt/mqttSlice";
+import {
+  ONLINE,
+  RETURN_HISTORY,
+  RETURN_TOPIC,
+} from "../../../../services/mqtt/mqttType";
 
 const AdminDashboardPage = () => {
   const dispatch = useDispatch();
@@ -30,7 +40,7 @@ const AdminDashboardPage = () => {
   const findIsShowById = (id) => {
     return (
       isShowStudentData.length !== 0 &&
-      isShowStudentData.find((data) => data.id === id).isShowData
+      isShowStudentData.find((data) => data.id === id)?.isShowData
     );
   };
 
@@ -81,6 +91,14 @@ const AdminDashboardPage = () => {
         qos: 0,
       };
       mqttSub(clientMqtt, subscription, dispatch);
+      const context = {
+        topic: "admin",
+        qos: 0,
+        payload: {
+          type: "get-all-topic",
+        },
+      };
+      mqttPublish(clientMqtt, context);
     }
   }, [clientMqtt]);
 
@@ -88,16 +106,52 @@ const AdminDashboardPage = () => {
     if (payload) {
       console.log("hi");
       const message = payload.message;
-      if (message.type && message.type === "online") {
-        const id = message.id;
-        const foundFunc = findTimeOutById(id);
-        dispatch(dataAnalyzingActions.setOnlineById(id));
-        if (foundFunc.timeout) {
-          clearTimeout(foundFunc.timeout);
+      if (message.type) {
+        switch (message.type) {
+          case ONLINE: {
+            const id = message.id;
+            const foundFunc = findTimeOutById(id);
+            dispatch(dataAnalyzingActions.setOnlineById(id));
+            if (foundFunc.timeout) {
+              clearTimeout(foundFunc.timeout);
+            }
+            foundFunc.timeout = setTimeout(() => {
+              dispatch(dataAnalyzingActions.setOfflineById(id));
+            }, 5000);
+            break;
+          }
+          case RETURN_TOPIC: {
+            const topicName = message.topicName;
+            const subscription = {
+              topic: topicName,
+              qos: 0,
+            };
+            if (clientMqtt) {
+              mqttSub(clientMqtt, subscription, dispatch);
+              const context = {
+                topic: topicName,
+                qos: 0,
+                payload: {
+                  type: "get-history",
+                },
+              };
+              console.log(context);
+              mqttPublish(clientMqtt, context);
+            }
+            break;
+          }
+          case RETURN_HISTORY: {
+            console.log("Halo");
+            const id = message.id;
+            const dataHistory = message.data;
+
+            dispatch(dataAnalyzingActions.addData({ id, dataHistory }));
+            break;
+          }
+
+          default:
+            break;
         }
-        foundFunc.timeout = setTimeout(() => {
-          dispatch(dataAnalyzingActions.setOfflineById(id));
-        }, 5000);
       }
     }
   }, [payload]);
