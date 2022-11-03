@@ -14,6 +14,7 @@ const HomePage = () => {
 
   // STATE
   const [client, setClient] = useState(null);
+  const [isDrawChart, setIsDrawChart] = useState(false);
 
   // SELECTOR
   const payload = useSelector(mqttPayloadSelector);
@@ -100,10 +101,10 @@ const HomePage = () => {
           <Publisher mqttPublish={mqttPublish}/>
         </div>
         <div className={styles.body_item}>
-          <TableData />
+          <TableData setIsDrawChart={setIsDrawChart}/>
         </div>
         <div className={styles.body_item}>
-          <ChartData />
+          <ChartData isDrawChart={isDrawChart} setIsDrawChart={setIsDrawChart}/>
         </div>
       </div>
     </div>

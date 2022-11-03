@@ -22,8 +22,9 @@ const Connector = ({mqttConnect, mqttDisconect, mqttSub, mqttUnSub}) => {
   const onFinish = (values) => {
     setTopic(values.nameComputer + "_" + values.studentID);
     dispatch(authSliceActions.setCurrentUserID(values.nameComputer + "_" + values.studentID));
-    const host = 'broker.emqx.io';
-    const port = 8083;
+    // const host = 'broker.emqx.io';
+    const host = 'broker.mqttdashboard.com';
+    const port = 8000;
     const url = `ws://${host}:${port}/mqtt`;
     const options = {
       keepalive: 30,
@@ -58,18 +59,6 @@ const Connector = ({mqttConnect, mqttDisconect, mqttSub, mqttUnSub}) => {
     }
   }, [connectionStatus]);
 
-  // useEffect(() => {
-  //   const topic = payload.topic;
-  //   if (topic) {
-  //     const message = payload.message;
-  //     dispatch(
-  //       dataAnalyzingActions.addVoltageByID({
-  //         ID: currentID,
-  //         voltage: message,
-  //       })
-  //     );
-  //   }
-  // }, [payload]);
 
 
   return (
@@ -77,9 +66,7 @@ const Connector = ({mqttConnect, mqttDisconect, mqttSub, mqttUnSub}) => {
       <Card
         title="Đăng nhập"
         actions={[
-          <Button danger onClick={onReset}>
-            Disconnect
-          </Button>,
+          
         ]}
       >
         <Form {...layout} form={form} name="control-hooks" onFinish={onFinish}>
@@ -97,11 +84,14 @@ const Connector = ({mqttConnect, mqttDisconect, mqttSub, mqttUnSub}) => {
           >
             <Input placeholder="B19DCCN067" />
           </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              {connectionStatus}
-            </Button>
-          </Form.Item>
+            <div className={styles.group_btn}>
+              <Button type="primary" htmlType="submit">
+                {connectionStatus}
+              </Button>
+              <Button danger onClick={onReset}>
+                Disconnect
+              </Button>
+            </div>
         </Form>
       </Card>
     </div>
