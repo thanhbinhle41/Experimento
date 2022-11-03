@@ -37,7 +37,7 @@ export const mqttPublish = (client, context) => {
   console.log(client);
   if (client) {
     const { topic, qos, payload } = context;
-    client.publish(topic, payload, { qos }, (error) => {
+    client.publish(topic, JSON.stringify(payload), { qos }, (error) => {
       if (error) {
         console.log("Publish error: ", error);
       }
@@ -53,6 +53,7 @@ export const mqttSub = (client, subscription, dispatch) => {
         console.log("Subscribe to topics error", error);
         return;
       }
+      console.log("Topic subscribed: " + topic);
       dispatch(mqttAction.setIsSubed(true));
     });
   }
