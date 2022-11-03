@@ -111,6 +111,8 @@ const AdminDashboardPage = () => {
           case ONLINE: {
             const id = message.id;
             const foundFunc = findTimeOutById(id);
+            if (foundFunc === undefined) 
+              return;
             dispatch(dataAnalyzingActions.setOnlineById(id));
             if (foundFunc.timeout) {
               clearTimeout(foundFunc.timeout);
@@ -127,6 +129,7 @@ const AdminDashboardPage = () => {
               qos: 0,
             };
             if (clientMqtt) {
+              console.log(subscription);
               mqttSub(clientMqtt, subscription, dispatch);
               const context = {
                 topic: topicName,

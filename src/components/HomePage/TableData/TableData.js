@@ -82,6 +82,8 @@ export const TableData = ({setIsDrawChart}) => {
     setIsDrawChart(true);
   }
 
+  console.log(dataTable);
+
   return (
     <div>
       <Card

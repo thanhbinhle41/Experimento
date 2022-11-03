@@ -8,19 +8,22 @@ import StudentTable from "./StudentTable";
 const StudentData = (props) => {
   const { id, dataExperiment } = props;
   let dataTable = dataExperiment.filter((data) => data.id === id);
-  dataTable = dataTable[0].dataFromCOM.map((data, index) => ({
-    ...data,
+  dataTable = dataTable[0].dataFromCOM.map((item, index) => ({
+    // ...item,
+    distance: item.data.distance,
+    voltage: item.data.voltage,
+    time: item.data.time,
     index: index + 1,
-    key: data.time,
+    key: item.data.time,
   }));
-  console.log(dataTable);
+  // console.log(dataTable);
   const dataExcel = dataTable.map((data, index) => ({
     STT: index + 1,
     "Khoảng cách": data.distance,
     "Điện áp": data.voltage,
     "Thời gian": data.time,
   }));
-  console.log(dataExcel);
+  // console.log(dataExcel);
 
   const handleExportBtn = () => {
     const ws = utils.json_to_sheet(dataExcel);

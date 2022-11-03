@@ -5,51 +5,51 @@ const dataAnalyzingSlice = createSlice({
   initialState: {
     currentDistance: 0,
     dataExperiment: [
-      {
-        id: "B19DCCN431",
-        dataDistance: 30,
-        dataFromCOM: [
-          { distance: 0, voltage: 0, time: "19-09-2001" },
-          { distance: 5, voltage: 20, time: "20-09-2001" },
-          { distance: 10, voltage: 40, time: "21-09-2001" },
-          { distance: 15, voltage: 30, time: "22-09-2001" },
-          { distance: 25, voltage: 10, time: "23-09-2001" },
-          { distance: 18, voltage: 10, time: "24-09-2001" },
-          { distance: 20, voltage: 50, time: "25-09-2001" },
-          { distance: 25, voltage: 10, time: "26-09-2001" },
-        ],
-        isChosen: false,
-        isOnline: false,
-      },
-      {
-        id: "B19DCCN067",
-        dataDistance: 30,
-        dataFromCOM: [
-          { distance: 0, voltage: 0, time: "19-09-2001" },
-          { distance: 5, voltage: 20, time: "20-09-2001" },
-          { distance: 10, voltage: 40, time: "21-09-2001" },
-          { distance: 15, voltage: 30, time: "22-09-2001" },
-          { distance: 25, voltage: 10, time: "23-09-2001" },
-          { distance: 20, voltage: 50, time: "25-09-2001" },
-          { distance: 25, voltage: 10, time: "26-09-2001" },
-        ],
-        isChosen: false,
-        isOnline: false,
-      },
-      {
-        id: "TEST-B19DCCNabc",
-        dataDistance: 30,
-        dataFromCOM: [
-          { distance: 0, voltage: 0, time: "19-09-2001" },
-          { distance: 5, voltage: 20, time: "20-09-2001" },
-          { distance: 10, voltage: 40, time: "21-09-2001" },
-          { distance: 18, voltage: 10, time: "24-09-2001" },
-          { distance: 20, voltage: 50, time: "25-09-2001" },
-          { distance: 25, voltage: 10, time: "26-09-2001" },
-        ],
-        isChosen: false,
-        isOnline: false,
-      },
+      // {
+      //   id: "B19DCCN431",
+      //   dataDistance: 30,
+      //   dataFromCOM: [
+      //     { distance: 0, voltage: 0, time: "19-09-2001" },
+      //     { distance: 5, voltage: 20, time: "20-09-2001" },
+      //     { distance: 10, voltage: 40, time: "21-09-2001" },
+      //     { distance: 15, voltage: 30, time: "22-09-2001" },
+      //     { distance: 25, voltage: 10, time: "23-09-2001" },
+      //     { distance: 18, voltage: 10, time: "24-09-2001" },
+      //     { distance: 20, voltage: 50, time: "25-09-2001" },
+      //     { distance: 25, voltage: 10, time: "26-09-2001" },
+      //   ],
+      //   isChosen: false,
+      //   isOnline: false,
+      // },
+      // {
+      //   id: "B19DCCN067",
+      //   dataDistance: 30,
+      //   dataFromCOM: [
+      //     { distance: 0, voltage: 0, time: "19-09-2001" },
+      //     { distance: 5, voltage: 20, time: "20-09-2001" },
+      //     { distance: 10, voltage: 40, time: "21-09-2001" },
+      //     { distance: 15, voltage: 30, time: "22-09-2001" },
+      //     { distance: 25, voltage: 10, time: "23-09-2001" },
+      //     { distance: 20, voltage: 50, time: "25-09-2001" },
+      //     { distance: 25, voltage: 10, time: "26-09-2001" },
+      //   ],
+      //   isChosen: false,
+      //   isOnline: false,
+      // },
+      // {
+      //   id: "TEST-B19DCCNabc",
+      //   dataDistance: 30,
+      //   dataFromCOM: [
+      //     { distance: 0, voltage: 0, time: "19-09-2001" },
+      //     { distance: 5, voltage: 20, time: "20-09-2001" },
+      //     { distance: 10, voltage: 40, time: "21-09-2001" },
+      //     { distance: 18, voltage: 10, time: "24-09-2001" },
+      //     { distance: 20, voltage: 50, time: "25-09-2001" },
+      //     { distance: 25, voltage: 10, time: "26-09-2001" },
+      //   ],
+      //   isChosen: false,
+      //   isOnline: false,
+      // },
     ],
     /*
             [{ 
@@ -101,16 +101,21 @@ const dataAnalyzingSlice = createSlice({
       const foundData = state.dataExperiment.find(
         (data) => data.id === action.payload
       );
-      foundData.isOnline = true;
+      if (foundData) {
+        foundData.isOnline = true;
+      }
     },
     setOfflineById: (state, action) => {
       const foundData = state.dataExperiment.find(
         (data) => data.id === action.payload
       );
-      foundData.isOnline = false;
+      if (foundData) {
+        foundData.isOnline = false;
+      }
     },
     addData: (state, action) => {
       const { id, dataHistory } = action.payload;
+      console.log(action.payload);
       const foundData = state.dataExperiment.find((data) => data.id === id);
       if (foundData) {
         foundData.dataFromCOM = dataHistory;
@@ -120,7 +125,7 @@ const dataAnalyzingSlice = createSlice({
           id,
           dataFromCOM: dataHistory,
           isOnline: false,
-          isChosen: false,
+          isChosen: false
         };
         state.dataExperiment.push(newData);
       }
