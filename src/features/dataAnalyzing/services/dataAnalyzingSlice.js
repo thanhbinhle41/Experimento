@@ -17,6 +17,8 @@ const dataAnalyzingSlice = createSlice({
           { distance: 18, voltage: 10, time: "24-09-2001" },
           { distance: 20, voltage: 50, time: "25-09-2001" },
           { distance: 25, voltage: 10, time: "26-09-2001" },
+          { distance: 5, voltage: 20, time: "20-09-2001" },
+          { distance: 25, voltage: 10, time: "26-09-2001" },
         ],
         isChosen: false,
         isOnline: false,
