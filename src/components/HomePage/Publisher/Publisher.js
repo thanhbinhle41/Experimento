@@ -1,53 +1,74 @@
-import React from 'react'
+import {React, useState} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./Publisher.module.scss";
-import { Button, Form, Input, Card } from 'antd';
-import { dataAnalyzingActions } from '../../../features/dataAnalyzing/services/dataAnalyzingSlice';
-import { currentIDSelector } from '../../../features/auth/services/authSlice';
+import { Button, Form, Input, Card } from "antd";
+import { dataAnalyzingActions } from "../../../features/dataAnalyzing/services/dataAnalyzingSlice";
+import { currentIDSelector } from "../../../features/auth/services/authSlice";
 
 const Publisher = ({ mqttPublish }) => {
-    const dispatch = useDispatch();
-    const currentUserID = useSelector(currentIDSelector);
+  const dispatch = useDispatch();
 
-    const layout = {
-        labelCol: { span: 4 },
-        wrapperCol: { span: 20 },
-    };
+  // SELECTOR
+  const currentUserID = useSelector(currentIDSelector);
 
-    const [form] = Form.useForm();
+  //USE STATE
+  const [isShowChart, setIsShowChart] = useState(false);
 
-    const onFinish = (values, type="once") => {
-        dispatch(dataAnalyzingActions.setCurrentDistance(values.distance));
-        const payload = JSON.stringify({
-            type: "get-live-data",
-            data: {
-                "distance": values.distance
-            }
-        });
-        mqttPublish({topic: currentUserID, qos: 0, payload});
-    };
+  const layout = {
+    labelCol: { span: 4 },
+    wrapperCol: { span: 20 },
+  };
 
-    return (
-        <div className={styles.container}>
-        <Card
-            title="Dữ liệu khoảng cách"
-            actions={[
-                
+  const [form] = Form.useForm();
+
+  const onFinish = (values, type = "once") => {
+    dispatch(dataAnalyzingActions.setCurrentDistance(values.distance));
+    const payload = JSON.stringify({
+      type: "get-live-data",
+      data: {
+        distance: values.distance,
+      },
+    });
+    mqttPublish({ topic: currentUserID, qos: 0, payload });
+  };
+
+  return (
+    <div className={styles.container}>
+      <Card title="Dữ liệu khoảng cách" actions={[]}>
+        <Form {...layout} form={form} name="control-hooks" onFinish={onFinish}>
+          <Form.Item
+            name="distance"
+            label="Khoảng cách"
+            rules={[
+              { required: true, message: "Khoảng cách không được bỏ trống!" },
             ]}
-        >
-            <Form {...layout} form={form} name="control-hooks" onFinish={onFinish}>
-                <Form.Item name="distance" label="Khoảng cách" rules={[{required: true}]}>
-                    <Input placeholder="0 - 30cm"/>
-                </Form.Item>
-                <div className={styles.group_btn}>
-                    <Button type="primary" htmlType='submit'>Gửi</Button>
-                    <Button type="primary" onClick={() => {}}>Gửi liên tục</Button>
-                </div>
-            </Form>
-        </Card>
-        </div>
-    )
-}
+          >
+            <Input placeholder="0 - 30cm" />
+          </Form.Item>
+          <Form.Item
+            name="timeLoop"
+            label="Thời gian lặp lại"
+            rules={[
+              {
+                required: true,
+                message: '"Thời gian lặp lại" không được để trống!',
+              },
+            ]}
+          >
+            <Input placeholder="B19DCCN067" />
+          </Form.Item>
+          <div className={styles.group_btn}>
+            <Button type="primary" htmlType="submit">
+              Gửi
+            </Button>
+            <Button type="primary" onClick={() => {}}>
+              Gửi liên tục
+            </Button>
+          </div>
+        </Form>
+      </Card>
+    </div>
+  );
+};
 
-
-export default Publisher
+export default Publisher;

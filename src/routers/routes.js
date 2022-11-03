@@ -5,6 +5,10 @@ import HomePage from "../pages/HomePage/HomePage";
 
 const routes = [
   {
+    path: "/",
+    element: <HomePage></HomePage>,
+  },
+  {
     path: "/home-page",
     element: <HomePage></HomePage>,
   },

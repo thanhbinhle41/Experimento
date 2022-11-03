@@ -25,7 +25,7 @@ export const ChartData = ({isDrawChart, setIsDrawChart}) => {
   }
 
   useEffect(() => {
-    if (isDrawChart) {
+    if (isDrawChart && dataTable) {
       let newColums = [...columnsChart];
       let newDataChart = dataTable.map((data) => data.voltage);
       let newLabels = dataTable.map((data) => data.distance);

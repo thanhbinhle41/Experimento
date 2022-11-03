@@ -24,7 +24,7 @@ const StudentChart = (props) => {
       data: dataTable.map((data) => data.voltage),
       borderColor: "rgb(255, 99, 132)",
       backgroundColor: "rgba(255, 99, 132, 0.5)",
-      fill: true,
+      fill: false,
       showLine: true,
     },
   ];
