@@ -1,11 +1,10 @@
 import { React, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { ChartData } from "../../components/HomePage/ChartData/ChartData";
 import Connector from "../../components/HomePage/Connector/Connector";
 import Publisher from "../../components/HomePage/Publisher/Publisher";
 import { TableData } from "../../components/HomePage/TableData/TableData";
-import { currentIDSelector } from "../../features/auth/services/authSlice";
-import { mqttAction, mqttPayloadSelector } from "../../services/mqtt/mqttSlice";
+import { mqttAction } from "../../services/mqtt/mqttSlice";
 import styles from "./HomePage.module.scss";
 import mqtt from "../../../node_modules/mqtt/dist/mqtt";
 
@@ -16,9 +15,6 @@ const HomePage = () => {
   const [client, setClient] = useState(null);
   const [isDrawChart, setIsDrawChart] = useState(false);
 
-  // SELECTOR
-  const payload = useSelector(mqttPayloadSelector);
-  const currentID = useSelector(currentIDSelector);
 
   const mqttConnect = (host, mqttOption) => {
     dispatch(mqttAction.setConnectionStatus("Connecting"));
@@ -27,14 +23,14 @@ const HomePage = () => {
 
   const mqttDisconnect = () => {
     if (client) {
+      console.log("Disconnected")
       client.end(() => {
-        dispatch(mqttAction.setConnectionStatus("Disconnected"));
+        dispatch(mqttAction.setConnectionStatus("Connect"));
       });
     }
   }
 
   const mqttPublish = (context) => {
-    console.log(client);
     if (client) {
       const { topic, qos, payload } = context;
       client.publish(topic, payload, { qos }, error => {

@@ -1,12 +1,13 @@
 import { React, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./Connector.module.scss";
-import { Button, Form, Input, Card } from "antd";
+import { Button, Form, Input, Card, Modal } from "antd";
 import { authSliceActions } from "../../../features/auth/services/authSlice";
 import { connectionStatusSelector, isSubedSelector } from "../../../services/mqtt/mqttSlice";
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 
-const Connector = ({mqttConnect, mqttDisconect, mqttSub, mqttUnSub}) => {
+const Connector = ({mqttConnect, mqttDisconnect, mqttSub, mqttUnSub}) => {
   const dispatch = useDispatch()
   const [topic, setTopic] = useState("");
   
@@ -45,8 +46,23 @@ const Connector = ({mqttConnect, mqttDisconect, mqttSub, mqttUnSub}) => {
     mqttConnect(url, options);
   };
 
+  const onConfirmDisconnect = () => {
+    Modal.confirm({
+      title: 'Bạn có muốn ngắt kết nối này không?',
+      icon: <ExclamationCircleOutlined />,
+      content: 'Xác nhận ngắt kết nối sẽ xoá hết toàn bộ dữ liệu hiện tại!',
+      okText: 'Đồng ý',
+      okType: 'danger',
+      cancelText: 'Bỏ qua',
+      onOk() {
+        onReset();
+      }
+    });
+  };
+
   const onReset = () => {
     form.resetFields();
+    mqttDisconnect();
   };
 
 
@@ -73,14 +89,14 @@ const Connector = ({mqttConnect, mqttDisconect, mqttSub, mqttUnSub}) => {
           <Form.Item
             name="nameComputer"
             label="Tên máy"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "\"Tên máy\" không được để trống!" }]}
           >
             <Input placeholder="T6_Ca1_M1" />
           </Form.Item>
           <Form.Item
             name="studentID"
             label="Mã sinh viên"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "\"Mã sinh viên\" không được để trống!" }]}
           >
             <Input placeholder="B19DCCN067" />
           </Form.Item>
@@ -88,7 +104,7 @@ const Connector = ({mqttConnect, mqttDisconect, mqttSub, mqttUnSub}) => {
               <Button type="primary" htmlType="submit">
                 {connectionStatus}
               </Button>
-              <Button danger onClick={onReset}>
+              <Button danger onClick={onConfirmDisconnect}>
                 Disconnect
               </Button>
             </div>
