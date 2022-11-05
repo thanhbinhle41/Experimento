@@ -1,12 +1,17 @@
-import { Button, Col, Row } from "antd";
+import { Button, Card, Col, Row } from "antd";
 import React from "react";
 import { utils, writeFileXLSX } from "xlsx";
+import { useDispatch } from "react-redux";
 
 import StudentChart from "./StudentChart";
 import StudentTable from "./StudentTable";
+import { dataAnalyzingActions } from "../../services/dataAnalyzingSlice";
 
 const StudentData = (props) => {
-  const { id, dataExperiment } = props;
+  const { id, dataExperiment, chosenStudent, setChosenStudent } = props;
+
+  const dispatch = useDispatch();
+
   let dataTable = dataExperiment.filter((data) => data.id === id);
   dataTable = dataTable[0].dataFromCOM.map((item, index) => ({
     // ...item,
@@ -31,8 +36,25 @@ const StudentData = (props) => {
     utils.book_append_sheet(wb, ws);
     writeFileXLSX(wb, id + ".xlsx");
   };
+
+  const handleCloseBtn = () => {
+    dispatch(dataAnalyzingActions.setChosenFalseById(id));
+    setChosenStudent(chosenStudent.filter((student) => student.id !== id));
+  };
   return (
-    <>
+    <Card
+      actions={[
+        <Button onClick={handleExportBtn} type="primary">
+          Xuất file
+        </Button>,
+      ]}
+      extra={
+        <Button type="danger" onClick={handleCloseBtn}>
+          Đóng
+        </Button>
+      }
+      title={`Thông tin của ${id}`}
+    >
       <Row>
         <Col lg={16}>
           <StudentChart id={id} dataTable={dataTable} />
@@ -41,12 +63,7 @@ const StudentData = (props) => {
           <StudentTable id={id} dataTable={dataTable} />
         </Col>
       </Row>
-      <Row>
-        <Button onClick={handleExportBtn} type="primary">
-          Xuất file
-        </Button>
-      </Row>
-    </>
+    </Card>
   );
 };
 

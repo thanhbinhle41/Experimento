@@ -31,16 +31,15 @@ const AdminDashboardPage = () => {
 
   const [clientMqtt, setClientMqtt] = useState(null);
   const [timeOutFuncArr, setTimeOutFuncArr] = useState([]);
-  const [isShowStudentData, setIsShowStudentData] = useState([]);
+  const [chosenStudent, setChosenStudent] = useState([]);
 
   const findTimeOutById = (id) => {
     return timeOutFuncArr.find((data) => data.id === id);
   };
 
-  const findIsShowById = (id) => {
-    return (
-      isShowStudentData.length !== 0 &&
-      isShowStudentData.find((data) => data.id === id)?.isShowData
+  const handleShowResultBtn = () => {
+    setChosenStudent(
+      dataExperiment.filter((student) => student.isChosen === true)
     );
   };
 
@@ -55,12 +54,6 @@ const AdminDashboardPage = () => {
     setTimeOutFuncArr(
       dataExperiment.map((data) => ({
         id: data.id,
-      }))
-    );
-    setIsShowStudentData(
-      dataExperiment.map((data) => ({
-        id: data.id,
-        isShowData: false,
       }))
     );
   }, [dataExperiment.length]);
@@ -104,15 +97,13 @@ const AdminDashboardPage = () => {
 
   useEffect(() => {
     if (payload) {
-      console.log("hi");
       const message = payload.message;
       if (message.type) {
         switch (message.type) {
           case ONLINE: {
             const id = message.id;
             const foundFunc = findTimeOutById(id);
-            if (foundFunc === undefined) 
-              return;
+            if (foundFunc === undefined) return;
             dispatch(dataAnalyzingActions.setOnlineById(id));
             if (foundFunc.timeout) {
               clearTimeout(foundFunc.timeout);
@@ -161,24 +152,27 @@ const AdminDashboardPage = () => {
 
   return (
     <>
-      <Card title="Danh sách máy">
-        <AdminTable
-          isShowStudentData={isShowStudentData}
-          setIsShowStudentData={setIsShowStudentData}
-        />
+      <Card
+        actions={[
+          <Button type="primary" onClick={handleShowResultBtn}>
+            Xem kết quả
+          </Button>,
+          <Button type="primary">Refresh</Button>,
+        ]}
+        title="Danh sách máy"
+      >
+        <AdminTable />
       </Card>
       <Card title="Thông tin chi tiết">
-        {dataExperiment.map(
-          (student) =>
-            findIsShowById(student.id) && (
-              <Card title={`Thông tin của ${student.id}`} key={student.id}>
-                <StudentData id={student.id} dataExperiment={dataExperiment} />
-                <div style={{ display: "flex", justifyContent: "center" }}>
-                  <Button type="primary">Xuất file</Button>
-                </div>
-              </Card>
-            )
-        )}
+        {chosenStudent.map((student) => (
+          <StudentData
+            key={student.id}
+            id={student.id}
+            dataExperiment={dataExperiment}
+            chosenStudent={chosenStudent}
+            setChosenStudent={setChosenStudent}
+          />
+        ))}
       </Card>
     </>
   );

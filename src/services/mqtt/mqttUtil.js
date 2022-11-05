@@ -34,7 +34,7 @@ export const mqttDisconnect = (client, dispatch) => {
 };
 
 export const mqttPublish = (client, context) => {
-  console.log(client);
+  // console.log(client);
   if (client) {
     const { topic, qos, payload } = context;
     client.publish(topic, JSON.stringify(payload), { qos }, (error) => {
