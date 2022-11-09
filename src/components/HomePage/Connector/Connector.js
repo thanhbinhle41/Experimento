@@ -1,10 +1,10 @@
 import { React, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./Connector.module.scss";
-import { Button, Form, Input, Card, Modal } from "antd";
-import { authSliceActions } from "../../../features/auth/services/authSlice";
+import { Button, Form, Input, Card, Modal, Tooltip, notification } from "antd";
+import { authSliceActions, currentIDSelector } from "../../../features/auth/services/authSlice";
 import { connectionStatusSelector, isSubedSelector } from "../../../services/mqtt/mqttSlice";
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { ExclamationCircleOutlined, CopyOutlined } from '@ant-design/icons';
 
 
 const Connector = ({mqttConnect, mqttDisconnect, mqttSub, mqttUnSub}) => {
@@ -13,6 +13,7 @@ const Connector = ({mqttConnect, mqttDisconnect, mqttSub, mqttUnSub}) => {
   
   const connectionStatus = useSelector(connectionStatusSelector);
   const isSubed = useSelector(isSubedSelector);
+  const currentTopic = useSelector(currentIDSelector);
 
   const layout = {
     labelCol: { span: 4 },
@@ -65,6 +66,17 @@ const Connector = ({mqttConnect, mqttDisconnect, mqttSub, mqttUnSub}) => {
     mqttDisconnect();
   };
 
+  const onCopyTopic = () => {
+    if (currentTopic && currentTopic !== "") {
+      navigator.clipboard.writeText(currentTopic);
+      console.log("copy")
+      notification['success']({
+        message: 'Copy thành công',
+        duration: 1.5
+      });
+    }
+  }
+
 
   useEffect(() => {
     if (connectionStatus === "Connected" && isSubed === false) {
@@ -82,7 +94,6 @@ const Connector = ({mqttConnect, mqttDisconnect, mqttSub, mqttUnSub}) => {
       <Card
         title="Đăng nhập"
         actions={[
-          
         ]}
       >
         <Form {...layout} form={form} name="control-hooks" onFinish={onFinish}>
@@ -96,18 +107,39 @@ const Connector = ({mqttConnect, mqttDisconnect, mqttSub, mqttUnSub}) => {
           <Form.Item
             name="studentID"
             label="Mã sinh viên"
-            rules={[{ required: true, message: "\"Mã sinh viên\" không được để trống!" }]}
+            rules={[
+              { 
+                required: true, 
+                message: "\"Mã sinh viên\" không được để trống!" 
+              },
+              {
+                validator(_, value) {
+                  if (value) {
+                    return value.trim().match(/^[B]{1}([1-9]{2})([A-Z]{4})([0-9]{3})$/)
+                      ? Promise.resolve()
+                      : Promise.reject("\"Mã sinh viên\" không đúng định dạng!")
+                  }
+                  return Promise.reject()
+                }
+              },
+            ]}
           >
             <Input placeholder="B19DCCN067" />
           </Form.Item>
-            <div className={styles.group_btn}>
-              <Button type="primary" htmlType="submit">
-                {connectionStatus}
+
+          <div className={styles.group_btn}>
+            <Button type="primary" htmlType="submit">
+              {connectionStatus}
+            </Button>
+            <Button danger onClick={onConfirmDisconnect}>
+              Disconnect
+            </Button>
+            <Tooltip onClick={onCopyTopic} placement="bottomRight" title={"Copy topic nhập vào App"}>
+              <Button type="primary" icon={<CopyOutlined/>}>
+                Copy
               </Button>
-              <Button danger onClick={onConfirmDisconnect}>
-                Disconnect
-              </Button>
-            </div>
+            </Tooltip>
+          </div>
         </Form>
       </Card>
     </div>

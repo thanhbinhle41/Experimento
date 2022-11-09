@@ -1,4 +1,4 @@
-import {React, useState} from "react";
+import {React, useState, useEffect} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./Publisher.module.scss";
 import { Button, Form, Input, Card } from "antd";
@@ -11,8 +11,11 @@ const Publisher = ({ mqttPublish }) => {
   // SELECTOR
   const currentUserID = useSelector(currentIDSelector);
 
+
   //USE STATE
-  const [isShowChart, setIsShowChart] = useState(false);
+  const [isSendContinuous, setIsSendContinuous] = useState(false);
+  const [isShowTimeInput, setIsShowTimeInput] = useState(false);
+  const [intervalSend, setIntervalSend] = useState(null);
 
   const layout = {
     labelCol: { span: 4 },
@@ -21,16 +24,42 @@ const Publisher = ({ mqttPublish }) => {
 
   const [form] = Form.useForm();
 
-  const onFinish = (values, type = "once") => {
+  const onFinish = (values) => {
     dispatch(dataAnalyzingActions.setCurrentDistance(values.distance));
-    const payload = JSON.stringify({
+    const payload = {
       type: "get-live-data",
       data: {
         distance: values.distance,
       },
-    });
-    mqttPublish({ topic: currentUserID, qos: 0, payload });
+    };
+    if (isShowTimeInput) {
+      console.log("send continuous")
+      setTimeout(() => {
+        setIsSendContinuous(true);
+      }, 150);
+      payload.data["time"] = values.timeSend;
+      let sendContinuos = setInterval(() => {
+        mqttPublish({ topic: currentUserID, qos: 0, payload: JSON.stringify(payload)});
+        console.log("Publish", payload);
+      }, values.timeSend * 1000)
+      setIntervalSend(sendContinuos);
+    }
+    else {
+      console.log("Publish", payload);
+      mqttPublish({ topic: currentUserID, qos: 0, payload: JSON.stringify(payload)});
+    }
   };
+
+  const onSendContinous = () => {
+    setIsShowTimeInput(!isShowTimeInput);
+  }
+
+  const onStopSendContinous = () => {
+    clearInterval(intervalSend);
+    setTimeout(() => {
+      setIsSendContinuous(false);
+    }, 150);
+  }
 
   return (
     <div className={styles.container}>
@@ -41,29 +70,56 @@ const Publisher = ({ mqttPublish }) => {
             label="Khoảng cách"
             rules={[
               { required: true, message: "Khoảng cách không được bỏ trống!" },
+              {
+                validator(_, value) {
+                  if (!value || value === "") {
+                    return Promise.reject();
+                  }
+                  return Number(value) <= 30
+                    ? Promise.resolve()
+                    : Promise.reject("Khoảng cách từ 0-30cm!")
+                }
+              }
             ]}
           >
             <Input placeholder="0 - 30cm" />
           </Form.Item>
-          <Form.Item
-            name="timeLoop"
-            label="Thời gian lặp lại"
-            rules={[
-              {
-                required: true,
-                message: '"Thời gian lặp lại" không được để trống!',
-              },
-            ]}
-          >
-            <Input placeholder="B19DCCN067" />
-          </Form.Item>
+          {isShowTimeInput &&
+            <Form.Item
+              name="timeSend"
+              label="Khoảng thời gian gửi"
+              rules={[
+                { required: true, message: "Khoảng thời gian không được bỏ trống!" },
+                {
+                  validator(_, value) {
+                    if (!value || value === "") {
+                      return Promise.reject();
+                    }
+                    return Number(value) && Number(value) >= 1
+                      ? Promise.resolve()
+                      : Promise.reject("Thời gian không đúng định dạng!")
+                  }
+                }
+              ]}
+            >
+              <Input placeholder="1s" />
+            </Form.Item>
+          }
           <div className={styles.group_btn}>
-            <Button type="primary" htmlType="submit">
-              Gửi
-            </Button>
-            <Button type="primary" onClick={() => {}}>
-              Gửi liên tục
-            </Button>
+            {!isSendContinuous ? 
+              <>
+                <Button type="primary" htmlType="submit">
+                  Gửi
+                </Button>
+                <Button type="primary" onClick={onSendContinous}>
+                  {isShowTimeInput ? "Tắt" : "Bật"} gửi liên tục
+                </Button>
+              </>
+              :
+              <Button danger onClick={onStopSendContinous}>
+                Dừng gửi liên tục
+              </Button>
+            }  
           </div>
         </Form>
       </Card>

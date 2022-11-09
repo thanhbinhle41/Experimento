@@ -13,7 +13,7 @@ const HomePage = () => {
 
   // STATE
   const [client, setClient] = useState(null);
-  const [isDrawChart, setIsDrawChart] = useState(false);
+  // const [isDrawChart, setIsDrawChart] = useState(false);
 
 
   const mqttConnect = (host, mqttOption) => {
@@ -97,11 +97,11 @@ const HomePage = () => {
           <Publisher mqttPublish={mqttPublish}/>
         </div>
         <div className={styles.body_item}>
-          <TableData setIsDrawChart={setIsDrawChart}/>
+          <TableData/>
         </div>
-        <div className={styles.body_item}>
+        {/* <div className={styles.body_item}>
           <ChartData isDrawChart={isDrawChart} setIsDrawChart={setIsDrawChart}/>
-        </div>
+        </div> */}
       </div>
     </div>
   );

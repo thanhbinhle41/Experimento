@@ -1,18 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Button, Card, Table } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { dataAnalyzingActions, dataExperimentSelector } from "../../../features/dataAnalyzing/services/dataAnalyzingSlice";
 import { currentIDSelector } from "../../../features/auth/services/authSlice";
 import { mqttPayloadSelector } from "../../../services/mqtt/mqttSlice";
+import { ChartData } from "../ChartData/ChartData";
 
-export const TableData = ({setIsDrawChart}) => {
+
+export const TableData = () => {
 	const dispatch = useDispatch();
 
   const payloadMessage = useSelector(mqttPayloadSelector);
   const studentID = useSelector(currentIDSelector);
   const dataExperiment = useSelector(dataExperimentSelector);
 
-  let dataTable = dataExperiment.filter((data) => data.id === studentID);
+  //State
+  const [isDrawChart, setIsDrawChart] = useState(false);
+
+  let dataTable = dataExperiment.filter((data) => data.id === "B19DCCN067");
   if (dataTable) {
     dataTable = dataTable[0]?.dataFromCOM.map((data, index) => ({
       ...data,
@@ -20,8 +25,6 @@ export const TableData = ({setIsDrawChart}) => {
       key: index,
     }));
   }
-
-	// const [dataTable, setDataTable] = useState([]);
 
   const columns = [
     {
@@ -58,25 +61,8 @@ export const TableData = ({setIsDrawChart}) => {
           time: res.data.time
         })
       );
-      // renderDataTable();
     }
   }, [payloadMessage]);
-
-
-  // const renderDataTable = () => {
-  //   let tmpData = [...dataTable];
-  //   let listData = dataExperiment.find(item => item.id === studentID)?.dataFromCOM;
-  //   if (listData === undefined) return;
-  //   let lengthData = listData.length - 1;
-  //   tmpData.push({
-  //     key: lengthData,
-  //     id: lengthData + 1,
-  //     distance: listData[lengthData].distance,
-  //     voltage: listData[lengthData].voltage,
-  //     time: listData[lengthData].time,
-  //   })
-  //   setDataTable(tmpData);
-  // }
 
   const onShowDataChart = () => {
     setIsDrawChart(true);
@@ -96,6 +82,9 @@ export const TableData = ({setIsDrawChart}) => {
       >
         <Table columns={columns} dataSource={dataTable} />
       </Card>
+      <div style={{"padding-top": "48px"}}>
+        <ChartData isDrawChart={isDrawChart} dataTable={dataTable}/>
+      </div>
     </div>
   );
 };
