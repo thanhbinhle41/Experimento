@@ -2,47 +2,23 @@ import React, { useEffect, useState } from "react";
 import { faker } from "@faker-js/faker";
 import { useDispatch, useSelector } from "react-redux";
 import LineChart from "../../LineChart/LineChart";
-import { Card } from "antd";
+import { Card, Empty } from "antd";
 import { mqttPayloadSelector } from "../../../services/mqtt/mqttSlice";
 import { dataAnalyzingActions, dataExperimentSelector } from "../../../features/dataAnalyzing/services/dataAnalyzingSlice";
 import { currentIDSelector } from "../../../features/auth/services/authSlice";
 
-export const ChartData = ({isDrawChart, setIsDrawChart}) => {
+export const ChartData = ({isDrawChart, dataTable}) => {
 
-  const studentID = useSelector(currentIDSelector);
+  // const [labels, setLabels] = useState([]);
 
-  const dataExperiment = useSelector(dataExperimentSelector);
+  const labels = dataTable.map((data) => data.distance);
 
-  const [labels, setLabels] = useState([]);
+  console.log(dataTable);
 
-  let dataTable = dataExperiment.filter((data) => data.id === studentID);
-  if (dataTable) {
-    dataTable = dataTable[0]?.dataFromCOM.map((data, index) => ({
-      ...data,
-      id: index + 1,
-      key: index,
-    }));
-  }
-
-  useEffect(() => {
-    if (isDrawChart && dataTable) {
-      let newColums = [...columnsChart];
-      let newDataChart = dataTable.map((data) => data.voltage);
-      let newLabels = dataTable.map((data) => data.distance);
-      setLabels([...newLabels]);
-      newColums[0].data = newDataChart;
-      setColumnsChart([...newColums]);
-      setIsDrawChart(false);
-    }
-  }, [isDrawChart])
-
-
-
-
-  const [columnsChart, setColumnsChart] = useState([
+  const columnsChart = [
     {
       label: "Voltage",
-      data: [],
+      data: dataTable.map((data) => data.voltage),
       borderColor: "rgb(255, 99, 132)",
       backgroundColor: "rgba(255, 99, 132, 0.5)",
       fill: true,
@@ -54,20 +30,24 @@ export const ChartData = ({isDrawChart, setIsDrawChart}) => {
     //   backgroundColor: "rgba(53, 162, 235, 0.5)",
     //   fill: true,
     // },
-  ]);
+  ];
 
   const options = {
     isStacked: false,
     position: "top",
   };
+
   return (
     <Card title="Biểu đồ">
-      <LineChart
-        title="Line chart data"
-        labels={labels}
-        columns={columnsChart}
-        options={options}
-      />
+      {isDrawChart ? 
+        <LineChart
+          title="Line chart data"
+          labels={labels}
+          columns={columnsChart}
+          options={options}
+        />
+        : <Empty />
+      }
     </Card>
   );
 };
