@@ -11,14 +11,15 @@ export const ChartData = ({isDrawChart, dataTable}) => {
 
   // const [labels, setLabels] = useState([]);
 
-  const labels = dataTable.map((data) => data.distance);
+  
+  const labels = dataTable ? dataTable.map((data) => data.distance) : [];
 
   console.log(dataTable);
 
   const columnsChart = [
     {
       label: "Voltage",
-      data: dataTable.map((data) => data.voltage),
+      data: dataTable ? dataTable.map((data) => data.voltage) : [],
       borderColor: "rgb(255, 99, 132)",
       backgroundColor: "rgba(255, 99, 132, 0.5)",
       fill: true,
