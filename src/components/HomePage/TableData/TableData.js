@@ -17,7 +17,7 @@ export const TableData = () => {
   //State
   const [isDrawChart, setIsDrawChart] = useState(false);
 
-  let dataTable = dataExperiment.filter((data) => data.id === "B19DCCN067");
+  let dataTable = dataExperiment.filter((data) => data.id === studentID);
   if (dataTable) {
     dataTable = dataTable[0]?.dataFromCOM.map((data, index) => ({
       ...data,
