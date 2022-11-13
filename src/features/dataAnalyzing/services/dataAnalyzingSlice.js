@@ -90,24 +90,19 @@ const dataAnalyzingSlice = createSlice({
       );
     },
     addVoltageByID: (state, action) => {
-      const { ID, voltage, time } = action.payload;
+      const { ID, data } = action.payload;
       const item = state.dataExperiment.find((i) => i.id === ID);
-      let newData = {
-        distance: state.currentDistance,
-        voltage: voltage,
-        time: time,
-      };
       if (item === undefined) {
         state.dataExperiment.push({
           id: ID,
           distance: state.currentDistance,
-          dataFromCOM: [newData],
+          dataFromCOM: [{ data: data }],
           isChosen: false,
           isOnline: false,
         });
         console.log("Create new data experiment");
       } else {
-        item.dataFromCOM.push(newData);
+        item.dataFromCOM.unshift({ data: data });
         console.log("Add data experiment");
       }
     },
@@ -144,7 +139,7 @@ const dataAnalyzingSlice = createSlice({
         const newData = {
           id,
           dataFromCOM: dataHistory,
-          isOnline: false,
+          isOnline: true,
           isChosen: false,
         };
         state.dataExperiment.push(newData);

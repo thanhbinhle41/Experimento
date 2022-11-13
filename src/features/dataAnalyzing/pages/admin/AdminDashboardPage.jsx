@@ -21,6 +21,7 @@ import {
   ONLINE,
   RETURN_HISTORY,
   RETURN_TOPIC,
+  LIVE_DATA,
 } from "../../../../services/mqtt/mqttType";
 
 const AdminDashboardPage = () => {
@@ -43,9 +44,22 @@ const AdminDashboardPage = () => {
     );
   };
 
+  const handleRefreshBtn = () => {
+    if (clientMqtt) {
+      const context = {
+        topic: "admin",
+        qos: 0,
+        payload: {
+          type: "get-all-topic",
+        },
+      };
+      mqttPublish(clientMqtt, context);
+    }
+  };
+
   useEffect(() => {
-    const host = "broker.mqttdashboard.com";
-    const port = 8000;
+    const host = "broker.emqx.io";
+    const port = 8083;
     const client = mqttConnect(host, port);
     setClientMqtt(client);
   }, []);
@@ -97,6 +111,7 @@ const AdminDashboardPage = () => {
 
   useEffect(() => {
     if (payload) {
+      console.log(payload);
       const message = payload.message;
       if (message.type) {
         switch (message.type) {
@@ -142,6 +157,16 @@ const AdminDashboardPage = () => {
             dispatch(dataAnalyzingActions.addData({ id, dataHistory }));
             break;
           }
+          case LIVE_DATA: {
+            const ID = message.id;
+            const data = message.data;
+            dispatch(
+              dataAnalyzingActions.addVoltageByID({
+                ID,
+                data,
+              })
+            );
+          }
 
           default:
             break;
@@ -157,7 +182,9 @@ const AdminDashboardPage = () => {
           <Button type="primary" onClick={handleShowResultBtn}>
             Xem kết quả
           </Button>,
-          <Button type="primary">Refresh</Button>,
+          <Button type="primary" onClick={handleRefreshBtn}>
+            Refresh
+          </Button>,
         ]}
         title="Danh sách máy"
       >
