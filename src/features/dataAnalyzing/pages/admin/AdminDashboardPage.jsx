@@ -23,8 +23,12 @@ import {
   RETURN_TOPIC,
   LIVE_DATA,
 } from "../../../../services/mqtt/mqttType";
+import { persistor } from "../../../../store/store";
+import { useNavigate } from "react-router";
+import ModalConfirmDeleteData from "../../components/admin/ModalConfirmDeleteData";
 
 const AdminDashboardPage = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const dataExperiment = useSelector(dataExperimentSelector);
@@ -33,6 +37,7 @@ const AdminDashboardPage = () => {
   const [clientMqtt, setClientMqtt] = useState(null);
   const [timeOutFuncArr, setTimeOutFuncArr] = useState([]);
   const [chosenStudent, setChosenStudent] = useState([]);
+  const [isShowConfirmDelete, setIsShowConfirmDelete] = useState(false);
 
   const findTimeOutById = (id) => {
     return timeOutFuncArr.find((data) => data.id === id);
@@ -56,7 +61,9 @@ const AdminDashboardPage = () => {
       mqttPublish(clientMqtt, context);
     }
   };
-
+  const handleDeleteDataBtn = async () => {
+    setIsShowConfirmDelete(true);
+  };
   useEffect(() => {
     const host = "broker.emqx.io";
     const port = 8083;
@@ -68,6 +75,9 @@ const AdminDashboardPage = () => {
     setTimeOutFuncArr(
       dataExperiment.map((data) => ({
         id: data.id,
+        timeout: setTimeout(() => {
+          dispatch(dataAnalyzingActions.setOfflineById(data.id));
+        }, 5000),
       }))
     );
   }, [dataExperiment.length]);
@@ -177,6 +187,10 @@ const AdminDashboardPage = () => {
 
   return (
     <>
+      <ModalConfirmDeleteData
+        isShowConfirmDelete={isShowConfirmDelete}
+        setIsShowConfirmDelete={setIsShowConfirmDelete}
+      />
       <Card
         actions={[
           <Button type="primary" onClick={handleShowResultBtn}>
@@ -184,6 +198,9 @@ const AdminDashboardPage = () => {
           </Button>,
           <Button type="primary" onClick={handleRefreshBtn}>
             Refresh
+          </Button>,
+          <Button type="danger" onClick={handleDeleteDataBtn}>
+            Xóa data
           </Button>,
         ]}
         title="Danh sách máy"
