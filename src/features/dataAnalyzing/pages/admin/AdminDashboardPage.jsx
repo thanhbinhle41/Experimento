@@ -21,9 +21,14 @@ import {
   ONLINE,
   RETURN_HISTORY,
   RETURN_TOPIC,
+  LIVE_DATA,
 } from "../../../../services/mqtt/mqttType";
+import { persistor } from "../../../../store/store";
+import { useNavigate } from "react-router";
+import ModalConfirmDeleteData from "../../components/admin/ModalConfirmDeleteData";
 
 const AdminDashboardPage = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const dataExperiment = useSelector(dataExperimentSelector);
@@ -32,6 +37,7 @@ const AdminDashboardPage = () => {
   const [clientMqtt, setClientMqtt] = useState(null);
   const [timeOutFuncArr, setTimeOutFuncArr] = useState([]);
   const [chosenStudent, setChosenStudent] = useState([]);
+  const [isShowConfirmDelete, setIsShowConfirmDelete] = useState(false);
 
   const findTimeOutById = (id) => {
     return timeOutFuncArr.find((data) => data.id === id);
@@ -43,9 +49,24 @@ const AdminDashboardPage = () => {
     );
   };
 
+  const handleRefreshBtn = () => {
+    if (clientMqtt) {
+      const context = {
+        topic: "admin",
+        qos: 0,
+        payload: {
+          type: "get-all-topic",
+        },
+      };
+      mqttPublish(clientMqtt, context);
+    }
+  };
+  const handleDeleteDataBtn = async () => {
+    setIsShowConfirmDelete(true);
+  };
   useEffect(() => {
-    const host = "broker.mqttdashboard.com";
-    const port = 8000;
+    const host = "broker.emqx.io";
+    const port = 8083;
     const client = mqttConnect(host, port);
     setClientMqtt(client);
   }, []);
@@ -54,6 +75,9 @@ const AdminDashboardPage = () => {
     setTimeOutFuncArr(
       dataExperiment.map((data) => ({
         id: data.id,
+        timeout: setTimeout(() => {
+          dispatch(dataAnalyzingActions.setOfflineById(data.id));
+        }, 5000),
       }))
     );
   }, [dataExperiment.length]);
@@ -97,6 +121,7 @@ const AdminDashboardPage = () => {
 
   useEffect(() => {
     if (payload) {
+      console.log(payload);
       const message = payload.message;
       if (message.type) {
         switch (message.type) {
@@ -142,6 +167,16 @@ const AdminDashboardPage = () => {
             dispatch(dataAnalyzingActions.addData({ id, dataHistory }));
             break;
           }
+          case LIVE_DATA: {
+            const ID = message.id;
+            const data = message.data;
+            dispatch(
+              dataAnalyzingActions.addVoltageByID({
+                ID,
+                data,
+              })
+            );
+          }
 
           default:
             break;
@@ -152,12 +187,21 @@ const AdminDashboardPage = () => {
 
   return (
     <>
+      <ModalConfirmDeleteData
+        isShowConfirmDelete={isShowConfirmDelete}
+        setIsShowConfirmDelete={setIsShowConfirmDelete}
+      />
       <Card
         actions={[
           <Button type="primary" onClick={handleShowResultBtn}>
             Xem kết quả
           </Button>,
-          <Button type="primary">Refresh</Button>,
+          <Button type="primary" onClick={handleRefreshBtn}>
+            Refresh
+          </Button>,
+          <Button type="danger" onClick={handleDeleteDataBtn}>
+            Xóa data
+          </Button>,
         ]}
         title="Danh sách máy"
       >

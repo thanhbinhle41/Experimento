@@ -9,9 +9,9 @@ const dataAnalyzingSlice = createSlice({
         id: "B19DCCN431",
         dataDistance: 30,
         dataFromCOM: [
-          { data: { distance: 0, voltage: 0, time: "19-09-2001" } },
-          { data: { distance: 10, voltage: 10, time: "20-09-2001" } },
           { data: { distance: 15, voltage: 20, time: "21-09-2001" } },
+          { data: { distance: 10, voltage: 10, time: "20-09-2001" } },
+          { data: { distance: 0, voltage: 0, time: "19-09-2001" } },
         ],
         isChosen: false,
         isOnline: false,
@@ -20,52 +20,14 @@ const dataAnalyzingSlice = createSlice({
         id: "B19DCCN430",
         dataDistance: 30,
         dataFromCOM: [
-          { data: { distance: 0, voltage: 0, time: "19-09-2001" } },
-          { data: { distance: 10, voltage: 10, time: "20-09-2001" } },
           { data: { distance: 15, voltage: 20, time: "21-09-2001" } },
-        ],
-        isChosen: false,
-        isOnline: false,
-      },
-      {
-        id: "B19DCCN067",
-        dataDistance: 30,
-        dataFromCOM: [
-          { distance: 0, voltage: 0, time: "19-09-2001" },
-          { distance: 5, voltage: 20, time: "20-09-2001" },
-          { distance: 10, voltage: 40, time: "21-09-2001" },
-          { distance: 15, voltage: 30, time: "22-09-2001" },
-          { distance: 25, voltage: 10, time: "23-09-2001" },
-          { distance: 20, voltage: 50, time: "25-09-2001" },
-          { distance: 25, voltage: 10, time: "26-09-2001" },
-        ],
-        isChosen: false,
-        isOnline: false,
-      },
-      {
-        id: "TEST-B19DCCNabc",
-        dataDistance: 30,
-        dataFromCOM: [
-          { distance: 0, voltage: 0, time: "19-09-2001" },
-          { distance: 5, voltage: 20, time: "20-09-2001" },
-          { distance: 10, voltage: 40, time: "21-09-2001" },
-          { distance: 18, voltage: 10, time: "24-09-2001" },
-          { distance: 20, voltage: 50, time: "25-09-2001" },
-          { distance: 25, voltage: 10, time: "26-09-2001" },
+          { data: { distance: 10, voltage: 10, time: "20-09-2001" } },
+          { data: { distance: 0, voltage: 0, time: "19-09-2001" } },
         ],
         isChosen: false,
         isOnline: false,
       },
     ],
-    /*
-            [{ 
-                id: "B19DCCN067",
-                dataDistance: float,
-                dataFromCOM: [{distance, voltage, time}],
-                isChosen: boolean,
-                isOnline: boolean
-            }] 
-        */
   },
   reducers: {
     toggleChosenSatusById: (state, action) => {
@@ -90,24 +52,20 @@ const dataAnalyzingSlice = createSlice({
       );
     },
     addVoltageByID: (state, action) => {
-      const { ID, voltage, time } = action.payload;
+      console.log("addVoltageByID")
+      const { ID, data } = action.payload;
       const item = state.dataExperiment.find((i) => i.id === ID);
-      let newData = {
-        distance: state.currentDistance,
-        voltage: voltage,
-        time: time,
-      };
       if (item === undefined) {
         state.dataExperiment.push({
           id: ID,
           distance: state.currentDistance,
-          dataFromCOM: [newData],
+          dataFromCOM: [{ data: data }],
           isChosen: false,
           isOnline: false,
         });
         console.log("Create new data experiment");
       } else {
-        item.dataFromCOM.push(newData);
+        item.dataFromCOM.unshift({ data: data });
         console.log("Add data experiment");
       }
     },
@@ -144,12 +102,29 @@ const dataAnalyzingSlice = createSlice({
         const newData = {
           id,
           dataFromCOM: dataHistory,
-          isOnline: false,
+          isOnline: true,
           isChosen: false,
         };
         state.dataExperiment.push(newData);
       }
     },
+    resetDataByID: (state, action) => {
+      const {id} = action.payload;
+      const foundData = state.dataExperiment.find((data) => data.id === id);
+      if (foundData) {
+        foundData.dataFromCOM = [];
+      }
+    },
+    deleteSingleDataById: (state, action) => {
+      const {id, time} = action.payload;
+      const foundData = state.dataExperiment.find((data) => data.id === id);
+      if (foundData) {
+        const index = foundData.dataFromCOM.findInxe(item => item.time == time);
+        if (index !== -1) {
+          foundData.dataFromCOM.splice(index, 1);
+        }
+      }
+    }
   },
 });
 

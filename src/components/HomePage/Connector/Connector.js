@@ -5,9 +5,10 @@ import { Button, Form, Input, Card, Modal, Tooltip, notification } from "antd";
 import { authSliceActions, currentIDSelector } from "../../../features/auth/services/authSlice";
 import { connectionStatusSelector, isSubedSelector } from "../../../services/mqtt/mqttSlice";
 import { ExclamationCircleOutlined, CopyOutlined } from '@ant-design/icons';
+import { GET_HISITORY } from "../../../services/mqtt/mqttType";
+import { dataAnalyzingActions } from "../../../features/dataAnalyzing/services/dataAnalyzingSlice";
 
-
-const Connector = ({mqttConnect, mqttDisconnect, mqttSub, mqttUnSub}) => {
+const Connector = ({mqttConnect, mqttDisconnect, mqttSub, mqttUnSub, mqttPublish}) => {
   const dispatch = useDispatch()
   const [topic, setTopic] = useState("");
   
@@ -24,9 +25,9 @@ const Connector = ({mqttConnect, mqttDisconnect, mqttSub, mqttUnSub}) => {
   const onFinish = (values) => {
     setTopic(values.nameComputer + "_" + values.studentID);
     dispatch(authSliceActions.setCurrentUserID(values.nameComputer + "_" + values.studentID));
-    // const host = 'broker.emqx.io';
-    const host = 'broker.mqttdashboard.com';
-    const port = 8000;
+    const host = 'broker.emqx.io';
+    // const host = 'broker.mqttdashboard.com';
+    const port = 8083;
     const url = `ws://${host}:${port}/mqtt`;
     const options = {
       keepalive: 30,
@@ -64,12 +65,12 @@ const Connector = ({mqttConnect, mqttDisconnect, mqttSub, mqttUnSub}) => {
   const onReset = () => {
     form.resetFields();
     mqttDisconnect();
+    dispatch(dataAnalyzingActions.resetDataByID({id: currentTopic}));
   };
 
   const onCopyTopic = () => {
     if (currentTopic && currentTopic !== "") {
       navigator.clipboard.writeText(currentTopic);
-      console.log("copy")
       notification['success']({
         message: 'Copy thành công',
         duration: 1.5
@@ -81,6 +82,7 @@ const Connector = ({mqttConnect, mqttDisconnect, mqttSub, mqttUnSub}) => {
   useEffect(() => {
     if (connectionStatus === "Connected" && isSubed === false) {
       mqttSub({topic: topic, qos: 0});
+      mqttPublish({ topic: currentTopic, qos: 0, payload: JSON.stringify({ type: GET_HISITORY })});
     }
     else if (connectionStatus === "Disconnected" && isSubed === true) {
       mqttUnSub({topic: topic, qos: 0});
