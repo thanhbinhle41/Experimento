@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { faker } from "@faker-js/faker";
-import { useDispatch, useSelector } from "react-redux";
 import LineChart from "../../LineChart/LineChart";
 import { Card, Empty } from "antd";
-import { mqttPayloadSelector } from "../../../services/mqtt/mqttSlice";
-import { dataAnalyzingActions, dataExperimentSelector } from "../../../features/dataAnalyzing/services/dataAnalyzingSlice";
-import { currentIDSelector } from "../../../features/auth/services/authSlice";
 
 export const ChartData = ({isDrawChart, dataTable}) => {
 
@@ -13,8 +8,6 @@ export const ChartData = ({isDrawChart, dataTable}) => {
 
   
   const labels = dataTable ? dataTable.map((data) => data.distance) : [];
-
-  console.log(dataTable);
 
   const columnsChart = [
     {

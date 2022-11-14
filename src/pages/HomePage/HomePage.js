@@ -91,13 +91,13 @@ const HomePage = () => {
     <div className={styles.container}>
       <div className={styles.body}>
         <div className={styles.body_item}>
-          <Connector mqttConnect={mqttConnect} mqttDisconnect={mqttDisconnect} mqttSub={mqttSub} mqttUnSub={mqttUnSub}/>
+          <Connector mqttConnect={mqttConnect} mqttDisconnect={mqttDisconnect} mqttSub={mqttSub} mqttUnSub={mqttUnSub} mqttPublish={mqttPublish}/>
         </div>
         <div className={styles.body_item}>
           <Publisher mqttPublish={mqttPublish}/>
         </div>
         <div className={styles.body_item}>
-          <TableData/>
+          <TableData mqttPublish={mqttPublish}/>
         </div>
         {/* <div className={styles.body_item}>
           <ChartData isDrawChart={isDrawChart} setIsDrawChart={setIsDrawChart}/>

@@ -5,23 +5,30 @@ import { dataAnalyzingActions, dataExperimentSelector } from "../../../features/
 import { currentIDSelector } from "../../../features/auth/services/authSlice";
 import { mqttPayloadSelector } from "../../../services/mqtt/mqttSlice";
 import { ChartData } from "../ChartData/ChartData";
+import { utils, writeFileXLSX } from "xlsx";
+import { DELETE_SINGLE_DATA_BY_ID, LIVE_DATA, RETURN_HISTORY } from "../../../services/mqtt/mqttType";
+import { DeleteOutlined } from '@ant-design/icons';
+import styles from "./TableData.module.scss";
 
 
-export const TableData = () => {
+export const TableData = ({mqttPublish}) => {
 	const dispatch = useDispatch();
 
   const payloadMessage = useSelector(mqttPayloadSelector);
-  const studentID = useSelector(currentIDSelector);
+  const currentTopic = useSelector(currentIDSelector);
   const dataExperiment = useSelector(dataExperimentSelector);
 
   //State
   const [isDrawChart, setIsDrawChart] = useState(false);
 
-  let dataTable = dataExperiment.filter((data) => data.id === studentID);
-  if (dataTable) {
-    dataTable = dataTable[0]?.dataFromCOM.map((data, index) => ({
-      ...data,
-      id: index + 1,
+  let dataByStudentID = dataExperiment.find((data) => data.id === currentTopic);
+  let dataTable = [];
+  if (dataByStudentID) {
+    let listData = [...dataByStudentID?.dataFromCOM];
+    let len = listData.length;
+    dataTable = listData.map((item, index) => ({
+      ...item.data,
+      id: len--,
       key: index,
     }));
   }
@@ -48,19 +55,57 @@ export const TableData = () => {
       dataIndex: "time",
       key: "time",
     },
+    {
+      title: 'Tác vụ',
+      key: 'action',
+      render: (_, record) => (
+        <div className={styles.actions_table}>
+            <a onClick={() => onDeleteSingleData(record)}>Delete</a>
+            <DeleteOutlined style={{"color": "red"}}/>
+        </div>
+      ),
+    },
   ];
+
+  const onDeleteSingleData = (item) => {
+    const payload = {
+      type: DELETE_SINGLE_DATA_BY_ID,
+      time: item.time
+    };
+    mqttPublish({ topic: currentTopic, qos: 0, payload: JSON.stringify(payload)});
+  }
 
 	useEffect(() => {
 		console.log("Socket return", payloadMessage);
-    if (payloadMessage?.message?.type === "live-data") {
-      const res = payloadMessage.message;
-      dispatch(
-        dataAnalyzingActions.addVoltageByID({
-          ID: studentID,
-          voltage: res.data.voltage,
-          time: res.data.time
-        })
-      );
+    if (payloadMessage?.message?.type) {
+      const message = payloadMessage.message;
+      switch (message.type) {
+        case LIVE_DATA: {
+          dispatch(
+            dataAnalyzingActions.addVoltageByID({
+              ID: message.id,
+              data: message.data,
+            })
+          );
+          break;
+        }
+        case RETURN_HISTORY: {
+          console.log("return history")
+          const id = message.id;
+          const dataHistory = message.data;
+          dispatch(dataAnalyzingActions.addData({ id, dataHistory }));
+          break;
+        }
+        case DELETE_SINGLE_DATA_BY_ID: {
+          console.log("Delete Single");
+          const id = message.id;
+          const time = message.time;
+          dispatch(dataAnalyzingActions.deleteSingleDataById({ id, time }));
+          break;
+        }
+        default:
+          break
+      }
     }
   }, [payloadMessage]);
 
@@ -68,21 +113,35 @@ export const TableData = () => {
     setIsDrawChart(true);
   }
 
-  console.log(dataTable);
+  const handleExportBtn = () => {
+    const dataExcel = dataTable.reverse().map((data, index) => ({
+      STT: index + 1,
+      "Khoảng cách": data.distance,
+      "Điện áp": data.voltage,
+      "Thời gian": data.time,
+    }));
+    const ws = utils.json_to_sheet(dataExcel);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws);
+    writeFileXLSX(wb, currentTopic + ".xlsx");
+  };
 
   return (
-    <div>
+    <div className={styles.container}>
       <Card
         title="Bảng kết quả"
         actions={[
           <Button type="primary" onClick={onShowDataChart}>
             Vẽ biểu đồ
           </Button>,
+          <Button type="primary" onClick={handleExportBtn}>
+            Xuất file
+          </Button>,
         ]}
       >
         <Table columns={columns} dataSource={dataTable} />
       </Card>
-      <div style={{"padding-top": "48px"}}>
+      <div style={{"paddingTop": "48px"}}>
         <ChartData isDrawChart={isDrawChart} dataTable={dataTable}/>
       </div>
     </div>
