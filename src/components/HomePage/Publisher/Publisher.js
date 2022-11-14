@@ -1,4 +1,4 @@
-import {React, useState, useEffect} from "react";
+import {React, useState} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./Publisher.module.scss";
 import { Button, Form, Input, Card } from "antd";
@@ -38,6 +38,7 @@ const Publisher = ({ mqttPublish }) => {
         setIsSendContinuous(true);
       }, 150);
       payload.data["time"] = values.timeSend;
+      mqttPublish({ topic: currentUserID, qos: 0, payload: JSON.stringify(payload)});
       let sendContinuos = setInterval(() => {
         mqttPublish({ topic: currentUserID, qos: 0, payload: JSON.stringify(payload)});
         console.log("Publish", payload);
@@ -111,7 +112,7 @@ const Publisher = ({ mqttPublish }) => {
                 <Button type="primary" htmlType="submit">
                   Gửi
                 </Button>
-                <Button type="primary" onClick={onSendContinous}>
+                <Button type="dashed" onClick={onSendContinous}>
                   {isShowTimeInput ? "Tắt" : "Bật"} gửi liên tục
                 </Button>
               </>
