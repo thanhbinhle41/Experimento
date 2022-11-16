@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Button, Card, Table } from "antd";
 import { useDispatch, useSelector } from "react-redux";
-import { dataAnalyzingActions, dataExperimentSelector } from "../../../features/dataAnalyzing/services/dataAnalyzingSlice";
-import { currentIDSelector } from "../../../features/auth/services/authSlice";
-import { mqttPayloadSelector } from "../../../services/mqtt/mqttSlice";
+import { dataAnalyzingActions, dataExperimentSelector } from "../../../dataAnalyzing/services/dataAnalyzingSlice";
+import { currentIDSelector } from "../../../auth/services/authSlice";
+import { mqttPayloadSelector } from "../../../../services/mqtt/mqttSlice";
 import { ChartData } from "../ChartData/ChartData";
 import { utils, writeFileXLSX } from "xlsx";
-import { DELETE_SINGLE_DATA_BY_ID, LIVE_DATA, RETURN_HISTORY } from "../../../services/mqtt/mqttType";
+import { DELETE_SINGLE_DATA_BY_ID, LIVE_DATA, RETURN_HISTORY } from "../../../../services/mqtt/mqttType";
 import { DeleteOutlined } from '@ant-design/icons';
 import styles from "./TableData.module.scss";
 

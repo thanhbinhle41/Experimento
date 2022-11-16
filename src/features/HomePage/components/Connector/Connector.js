@@ -2,11 +2,11 @@ import { React, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./Connector.module.scss";
 import { Button, Form, Input, Card, Modal, Tooltip, notification } from "antd";
-import { authSliceActions, currentIDSelector } from "../../../features/auth/services/authSlice";
-import { connectionStatusSelector, isSubedSelector } from "../../../services/mqtt/mqttSlice";
+import { authSliceActions, currentIDSelector } from "../../../auth/services/authSlice";
+import { connectionStatusSelector, isSubedSelector } from "../../../../services/mqtt/mqttSlice";
 import { ExclamationCircleOutlined, CopyOutlined } from '@ant-design/icons';
-import { GET_HISITORY } from "../../../services/mqtt/mqttType";
-import { dataAnalyzingActions } from "../../../features/dataAnalyzing/services/dataAnalyzingSlice";
+import { GET_HISITORY } from "../../../../services/mqtt/mqttType";
+import { dataAnalyzingActions } from "../../../dataAnalyzing/services/dataAnalyzingSlice";
 
 const Connector = ({mqttConnect, mqttDisconnect, mqttSub, mqttUnSub, mqttPublish}) => {
   const dispatch = useDispatch()
