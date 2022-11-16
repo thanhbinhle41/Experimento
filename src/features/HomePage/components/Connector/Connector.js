@@ -10,8 +10,11 @@ import { dataAnalyzingActions } from "../../../dataAnalyzing/services/dataAnalyz
 
 const Connector = ({mqttConnect, mqttDisconnect, mqttSub, mqttUnSub, mqttPublish}) => {
   const dispatch = useDispatch()
+
+  // STATE
   const [topic, setTopic] = useState("");
   
+  // SELECTOR
   const connectionStatus = useSelector(connectionStatusSelector);
   const isSubed = useSelector(isSubedSelector);
   const currentTopic = useSelector(currentIDSelector);
@@ -23,29 +26,11 @@ const Connector = ({mqttConnect, mqttDisconnect, mqttSub, mqttUnSub, mqttPublish
   const [form] = Form.useForm();
 
   const onFinish = (values) => {
-    setTopic(values.nameComputer + "_" + values.studentID);
-    dispatch(authSliceActions.setCurrentUserID(values.nameComputer + "_" + values.studentID));
-    const host = 'broker.emqx.io';
-    // const host = 'broker.mqttdashboard.com';
-    const port = 8083;
-    const url = `ws://${host}:${port}/mqtt`;
-    const options = {
-      keepalive: 30,
-      protocolId: 'MQTT',
-      protocolVersion: 4,
-      clean: true,
-      reconnectPeriod: 1000,
-      connectTimeout: 30 * 1000,
-      will: {
-        topic: 'WillMsg',
-        payload: 'Connection Closed abnormally..!',
-        qos: 0,
-        retain: false
-      },
-      rejectUnauthorized: false
-    };
-    options.clientId = values.studentID;
-    mqttConnect(url, options);
+    const newTopic = values.nameComputer + "_" + values.studentID;
+    setTopic(newTopic);
+    dispatch(authSliceActions.setCurrentUserID(newTopic));
+    mqttSub(newTopic);
+    mqttPublish(newTopic, { type: GET_HISITORY } );
   };
 
   const onConfirmDisconnect = () => {
@@ -79,16 +64,15 @@ const Connector = ({mqttConnect, mqttDisconnect, mqttSub, mqttUnSub, mqttPublish
   }
 
 
-  useEffect(() => {
-    if (connectionStatus === "Connected" && isSubed === false) {
-      mqttSub({topic: topic, qos: 0});
-      mqttPublish({ topic: currentTopic, qos: 0, payload: JSON.stringify({ type: GET_HISITORY })});
-    }
-    else if (connectionStatus === "Disconnected" && isSubed === true) {
-      mqttUnSub({topic: topic, qos: 0});
-    }
-  }, [connectionStatus]);
-
+  // useEffect(() => {
+  //   if (connectionStatus === "Connected" && isSubed === false) {
+  //     mqttSub({topic: topic, qos: 0});
+  //     mqttPublish({ topic: currentTopic, qos: 0, payload: JSON.stringify({ type: GET_HISITORY })});
+  //   }
+  //   else if (connectionStatus === "Disconnected" && isSubed === true) {
+  //     mqttUnSub({topic: topic, qos: 0});
+  //   }
+  // }, [connectionStatus]);
 
 
   return (

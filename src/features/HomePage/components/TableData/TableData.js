@@ -72,7 +72,7 @@ export const TableData = ({mqttPublish}) => {
       type: DELETE_SINGLE_DATA_BY_ID,
       time: item.time
     };
-    mqttPublish({ topic: currentTopic, qos: 0, payload: JSON.stringify(payload)});
+    mqttPublish(currentTopic, payload);
   }
 
 	useEffect(() => {

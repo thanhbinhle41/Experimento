@@ -38,16 +38,16 @@ const Publisher = ({ mqttPublish }) => {
         setIsSendContinuous(true);
       }, 150);
       payload.data["time"] = values.timeSend;
-      mqttPublish({ topic: currentUserID, qos: 0, payload: JSON.stringify(payload)});
+      mqttPublish(currentUserID, payload);
       let sendContinuos = setInterval(() => {
-        mqttPublish({ topic: currentUserID, qos: 0, payload: JSON.stringify(payload)});
+        mqttPublish(currentUserID, payload);
         console.log("Publish", payload);
       }, values.timeSend * 1000)
       setIntervalSend(sendContinuos);
     }
     else {
       console.log("Publish", payload);
-      mqttPublish({ topic: currentUserID, qos: 0, payload: JSON.stringify(payload)});
+      mqttPublish(currentUserID, payload);
     }
   };
 

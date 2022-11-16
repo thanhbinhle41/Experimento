@@ -1,90 +1,75 @@
-import { React, useEffect, useState } from "react";
+import { React, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import Connector from "../components/Connector/Connector";
 import Publisher from "../components/Publisher/Publisher";
 import { mqttAction } from "../../../services/mqtt/mqttSlice";
 import styles from "./HomePage.module.scss";
-import mqtt from "mqtt/dist/mqtt";
 import { TableData } from "../components/TableData/TableData";
+import { WEB_SOCKET_TYPE } from "../../../services/websocket/webSocketType";
+import { webSocketPublish, webSocketSub, webSocketUnSub } from "../../../utils/webSocket";
 
 const HomePage = () => {
   const dispatch = useDispatch();
 
+  // REF
+  const ws = useRef(null);
+
   // STATE
   const [client, setClient] = useState(null);
-  // const [isDrawChart, setIsDrawChart] = useState(false);
-
 
   const mqttConnect = (host, mqttOption) => {
-    dispatch(mqttAction.setConnectionStatus("Connecting"));
-    setClient(mqtt.connect(host, mqttOption));
+
+    // dispatch(mqttAction.setConnectionStatus("Connecting"));
   };
 
   const mqttDisconnect = () => {
     if (client) {
-      console.log("Disconnected")
-      client.end(() => {
-        dispatch(mqttAction.setConnectionStatus("Connect"));
-      });
+      client.close();
     }
   }
 
-  const mqttPublish = (context) => {
+  const mqttPublish = (topic, payload) => {
     if (client) {
-      const { topic, qos, payload } = context;
-      client.publish(topic, payload, { qos }, error => {
-        if (error) {
-          console.log('Publish error: ', error);
-        }
-      });
+      webSocketPublish(client, topic, payload);
     }
   }
 
-  const mqttSub = (subscription) => {
+  const mqttSub = (topic) => {
     if (client) {
-      const { topic, qos } = subscription;
-      client.subscribe(topic, { qos }, (error) => {
-        if (error) {
-          console.log('Subscribe to topics error', error)
-          return
-        }
-        dispatch(mqttAction.setIsSubed(true));
-      });
+      webSocketSub(client, topic);
+      dispatch(mqttAction.setConnectionStatus("Connected"));
+      dispatch(mqttAction.setIsSubed(true));
     }
   };
 
-  const mqttUnSub = (subscription) => {
+  const mqttUnSub = (topic) => {
     if (client) {
-      const { topic } = subscription;
-      client.unsubscribe(topic, error => {
-        if (error) {
-          console.log('Unsubscribe error', error)
-          return
-        }
-        dispatch(mqttAction.setIsSubed(false));
-      });
+      webSocketUnSub(client, topic);
+      dispatch(mqttAction.setIsSubed(false));
     }
   };
 
   useEffect(() => {
-    if (client) {
-      client.on("connect", () => {
-        dispatch(mqttAction.setConnectionStatus("Connected"));
-        console.log("Connected");
-      });
-      client.on("error", (err) => {
-        console.error("Connection error: ", err);
-        client.end();
-      });
-      client.on("reconnect", () => {
-        dispatch(mqttAction.setConnectionStatus("Reconnecting"));
-      });
-      client.on("message", (topic, message) => {
-        const payload = { topic, message: JSON.parse(message) };
-        dispatch(mqttAction.setMqttPayload(payload));
-      });
-    }
-  }, [client]);
+    ws.current = new WebSocket("ws://127.0.0.1:4444");
+    ws.current.onopen = () => {
+      console.log("ws opened");
+    };
+    ws.current.onclose = () => {
+      console.log("ws closed")
+      dispatch(mqttAction.setConnectionStatus("Connect"));
+    };
+    ws.current.onmessage = (message) => {
+      console.log(JSON.parse(message.data));
+      dispatch(mqttAction.setMqttPayload(JSON.parse(message.data)));
+    };
+
+    const wsCurrent = ws.current;
+    setClient(wsCurrent);
+
+    return () => {
+      wsCurrent.close();
+    };
+  }, []);
 
   return (
     <div className={styles.container}>
