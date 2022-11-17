@@ -1,17 +1,24 @@
+import { calculateNewValue } from "@testing-library/user-event/dist/utils";
 import { WEB_SOCKET_TYPE } from "../services/websocket/webSocketType";
 
-
-
+function str2ab(str) {
+  var buf = new ArrayBuffer(str.length); // 2 bytes for each char
+  var bufView = new Uint8Array(buf);
+  for (var i = 0, strLen = str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
+}
 
 export const webSocketSub = (ws, topic) => {
   const subscribeInfo = {
-    clientId: Number(topic.substr(topic.length - 3)),
+    clientId: Math.floor(Math.random() * 100),
     topic: topic,
     type: WEB_SOCKET_TYPE.SUBSCRIBE,
     payload: {},
-  }; 
-  ws.send(JSON.stringify(subscribeInfo));
-  
+  };
+  console.log(subscribeInfo);
+  ws.send(str2ab(JSON.stringify(subscribeInfo)));
 };
 
 export const webSocketUnSub = (ws, topic) => {
@@ -20,18 +27,18 @@ export const webSocketUnSub = (ws, topic) => {
     topic: topic,
     type: WEB_SOCKET_TYPE.UNSUBSCRIBE,
     payload: {},
-  }; 
-  ws.send(JSON.stringify(subscribeInfo));
+  };
+  ws.send(str2ab(JSON.stringify(subscribeInfo)));
 };
 
 export const webSocketPublish = (ws, topic, payload) => {
   let newPayLoad = payload;
   newPayLoad.topic = topic;
   const publishInfo = {
-    clientId: Number(topic.substr(topic.length - 3)),
+    clientId: Math.floor(Math.random() * 100),
     topic: topic,
     type: WEB_SOCKET_TYPE.PUBLISH,
-    payload: newPayLoad
+    payload: newPayLoad,
   };
-  ws.send(JSON.stringify(publishInfo));
-}
+  ws.send(str2ab(JSON.stringify(publishInfo)));
+};

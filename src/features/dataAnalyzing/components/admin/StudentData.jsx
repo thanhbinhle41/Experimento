@@ -19,7 +19,7 @@ const StudentData = (props) => {
     voltage: item.data.voltage,
     time: item.data.time,
     index: index + 1,
-    key: item.data.time,
+    key: index,
   }));
   // console.log(dataTable);
   const dataExcel = dataTable.map((data, index) => ({

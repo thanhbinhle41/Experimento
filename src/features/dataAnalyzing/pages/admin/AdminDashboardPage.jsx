@@ -1,5 +1,5 @@
 import { Button, Card } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AdminTable from "../../components/admin/AdminTable";
 import StudentData from "../../components/admin/StudentData";
 import {
@@ -26,6 +26,8 @@ import {
 import { persistor } from "../../../../store/store";
 import { useNavigate } from "react-router";
 import ModalConfirmDeleteData from "../../components/admin/ModalConfirmDeleteData";
+import { webSocketPublish, webSocketSub } from "../../../../utils/webSocket";
+// import {Web}
 
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
@@ -33,6 +35,8 @@ const AdminDashboardPage = () => {
 
   const dataExperiment = useSelector(dataExperimentSelector);
   const payload = useSelector(mqttPayloadSelector);
+
+  const ws = useRef(null);
 
   const [clientMqtt, setClientMqtt] = useState(null);
   const [timeOutFuncArr, setTimeOutFuncArr] = useState([]);
@@ -58,17 +62,47 @@ const AdminDashboardPage = () => {
           type: "get-all-topic",
         },
       };
-      mqttPublish(clientMqtt, context);
+      // mqttPublish(clientMqtt, context);
+      webSocketPublish(clientMqtt, "admin", { type: "get-all-topic" });
     }
   };
   const handleDeleteDataBtn = async () => {
     setIsShowConfirmDelete(true);
   };
   useEffect(() => {
-    const host = "broker.emqx.io";
-    const port = 8083;
-    const client = mqttConnect(host, port);
-    setClientMqtt(client);
+    // const host = "broker.emqx.io";
+    // const port = 8083;
+    // const client = mqttConnect(host, port);
+    // setClientMqtt(client);\
+    ws.current = new WebSocket("ws://127.0.0.1:4444");
+    ws.current.onopen = () => {
+      console.log("ws opened");
+      webSocketSub(ws.current, "admin");
+      webSocketSub(ws.current, "AHA_B19DCCN123");
+      dispatch(mqttAction.setConnectionStatus("Connected"));
+      dispatch(mqttAction.setIsSubed(true));
+
+      webSocketPublish(ws.current, "admin", { type: "get-all-topic" });
+    };
+    ws.current.onclose = () => {
+      console.log("ws closed");
+      dispatch(mqttAction.setConnectionStatus("Connect"));
+    };
+    ws.current.onmessage = async (e) => {
+      let reader = new FileReader();
+      reader.onload = function () {
+        const data = JSON.parse(reader.result);
+        dispatch(mqttAction.setMqttPayload(data.payload));
+      };
+      reader.readAsText(e.data);
+    };
+
+    const wsCurrent = ws.current;
+    setClientMqtt(wsCurrent);
+
+    return () => {
+      wsCurrent.close();
+    };
   }, []);
 
   useEffect(() => {
@@ -82,50 +116,59 @@ const AdminDashboardPage = () => {
     );
   }, [dataExperiment.length]);
 
-  useEffect(() => {
-    if (clientMqtt) {
-      clientMqtt.on("connect", () => {
-        dispatch(mqttAction.setConnectionStatus("Connected"));
-      });
-      clientMqtt.on("error", (err) => {
-        console.error("Connection error: ", err);
-        clientMqtt.end();
-      });
-      clientMqtt.on("reconnect", () => {
-        dispatch(mqttAction.setConnectionStatus("Reconnecting"));
-      });
-      clientMqtt.on("message", (topic, message) => {
-        const payload = { topic, message: JSON.parse(message) };
-        dispatch(mqttAction.setMqttPayload(payload));
-      });
-    }
-  }, [clientMqtt]);
+  // useEffect(() => {
+  //   if (clientMqtt) {
+  //     clientMqtt.on("connect", () => {
+  //       dispatch(mqttAction.setConnectionStatus("Connected"));
+  //     });
+  //     clientMqtt.on("error", (err) => {
+  //       console.error("Connection error: ", err);
+  //       clientMqtt.end();
+  //     });
+  //     clientMqtt.on("reconnect", () => {
+  //       dispatch(mqttAction.setConnectionStatus("Reconnecting"));
+  //     });
+  //     clientMqtt.on("message", (topic, message) => {
+  //       const payload = { topic, message: JSON.parse(message) };
+  //       dispatch(mqttAction.setMqttPayload(payload));
+  //     });
+  //   }
+  // }, [clientMqtt]);
 
   useEffect(() => {
+    // if (clientMqtt) {
+    //   const subscription = {
+    //     topic: "admin",
+    //     qos: 0,
+    //   };
+    //   mqttSub(clientMqtt, subscription, dispatch);
+    //   const context = {
+    //     topic: "admin",
+    //     qos: 0,
+    //     payload: {
+    //       type: "get-all-topic",
+    //     },
+    //   };
+    //   mqttPublish(clientMqtt, context);
+    // }
     if (clientMqtt) {
-      const subscription = {
-        topic: "admin",
-        qos: 0,
-      };
-      mqttSub(clientMqtt, subscription, dispatch);
-      const context = {
-        topic: "admin",
-        qos: 0,
-        payload: {
-          type: "get-all-topic",
-        },
-      };
-      mqttPublish(clientMqtt, context);
+      // console.log(clientMqtt);
+      // webSocketSub(clientMqtt, "admin");
+      // dispatch(mqttAction.setConnectionStatus("Connected"));
+      // dispatch(mqttAction.setIsSubed(true));
+      // webSocketPublish(clientMqtt, "admin", { type: "get-all-topic" });
     }
   }, [clientMqtt]);
 
   useEffect(() => {
     if (payload) {
       console.log(payload);
-      const message = payload.message;
+      const message = payload;
       if (message.type) {
+        console.log(message.type);
         switch (message.type) {
           case ONLINE: {
+            console.log("online cho: " + message.id);
             const id = message.id;
             const foundFunc = findTimeOutById(id);
             if (foundFunc === undefined) return;
@@ -146,7 +189,7 @@ const AdminDashboardPage = () => {
             };
             if (clientMqtt) {
               console.log(subscription);
-              mqttSub(clientMqtt, subscription, dispatch);
+              webSocketSub(clientMqtt, topicName);
               const context = {
                 topic: topicName,
                 qos: 0,
@@ -155,7 +198,7 @@ const AdminDashboardPage = () => {
                 },
               };
               console.log(context);
-              mqttPublish(clientMqtt, context);
+              webSocketPublish(clientMqtt, topicName, { type: "get-history" });
             }
             break;
           }
