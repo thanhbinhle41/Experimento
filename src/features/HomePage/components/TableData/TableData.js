@@ -6,7 +6,7 @@ import { currentIDSelector } from "../../../auth/services/authSlice";
 import { mqttPayloadSelector } from "../../../../services/mqtt/mqttSlice";
 import { ChartData } from "../ChartData/ChartData";
 import { utils, writeFileXLSX } from "xlsx";
-import { DELETE_SINGLE_DATA_BY_ID, LIVE_DATA, RETURN_HISTORY } from "../../../../services/mqtt/mqttType";
+import { DELETE_SINGLE_DATA_BY_ID, LIVE_DATA, RETURN_DELETE_SINGLE_DATA_BY_ID, RETURN_HISTORY } from "../../../../services/mqtt/mqttType";
 import { DeleteOutlined } from '@ant-design/icons';
 import styles from "./TableData.module.scss";
 
@@ -77,8 +77,8 @@ export const TableData = ({mqttPublish}) => {
 
 	useEffect(() => {
 		console.log("Socket return", payloadMessage);
-    if (payloadMessage?.message?.type) {
-      const message = payloadMessage.message;
+    if (payloadMessage?.type) {
+      const message = payloadMessage;
       switch (message.type) {
         case LIVE_DATA: {
           dispatch(
@@ -96,10 +96,10 @@ export const TableData = ({mqttPublish}) => {
           dispatch(dataAnalyzingActions.addData({ id, dataHistory }));
           break;
         }
-        case DELETE_SINGLE_DATA_BY_ID: {
+        case RETURN_DELETE_SINGLE_DATA_BY_ID: {
           console.log("Delete Single");
           const id = message.id;
-          const time = message.time;
+          const time = message.data.time;
           dispatch(dataAnalyzingActions.deleteSingleDataById({ id, time }));
           break;
         }

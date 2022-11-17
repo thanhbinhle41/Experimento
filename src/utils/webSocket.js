@@ -25,11 +25,13 @@ export const webSocketUnSub = (ws, topic) => {
 };
 
 export const webSocketPublish = (ws, topic, payload) => {
+  let newPayLoad = payload;
+  newPayLoad.topic = topic;
   const publishInfo = {
     clientId: Number(topic.substr(topic.length - 3)),
     topic: topic,
     type: WEB_SOCKET_TYPE.PUBLISH,
-    payload: payload
+    payload: newPayLoad
   };
   ws.send(JSON.stringify(publishInfo));
 }
