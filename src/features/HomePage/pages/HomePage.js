@@ -16,6 +16,7 @@ const HomePage = () => {
 
   // STATE
   const [client, setClient] = useState(null);
+  const [isConnected, setIsConnected] = useState(false)
 
   const mqttConnect = (host, mqttOption) => {
 
@@ -25,6 +26,8 @@ const HomePage = () => {
   const mqttDisconnect = () => {
     if (client) {
       client.close();
+      dispatch(mqttAction.setConnectionStatus("Connect"));
+      setIsConnected(false);
     }
   }
 
@@ -53,6 +56,7 @@ const HomePage = () => {
     ws.current = new WebSocket("ws://127.0.0.1:4444");
     ws.current.onopen = () => {
       console.log("ws opened");
+      setIsConnected(true);
     };
     ws.current.onclose = () => {
       console.log("ws closed")
@@ -69,7 +73,7 @@ const HomePage = () => {
     return () => {
       wsCurrent.close();
     };
-  }, []);
+  }, [isConnected]);
 
   return (
     <div className={styles.container}>
