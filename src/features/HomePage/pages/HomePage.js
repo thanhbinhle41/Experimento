@@ -6,7 +6,11 @@ import { mqttAction } from "../../../services/mqtt/mqttSlice";
 import styles from "./HomePage.module.scss";
 import { TableData } from "../components/TableData/TableData";
 import { WEB_SOCKET_TYPE } from "../../../services/websocket/webSocketType";
-import { webSocketPublish, webSocketSub, webSocketUnSub } from "../../../utils/webSocket";
+import {
+  webSocketPublish,
+  webSocketSub,
+  webSocketUnSub,
+} from "../../../utils/webSocket";
 
 const HomePage = () => {
   const dispatch = useDispatch();
@@ -18,7 +22,6 @@ const HomePage = () => {
   const [client, setClient] = useState(null);
 
   const mqttConnect = (host, mqttOption) => {
-
     // dispatch(mqttAction.setConnectionStatus("Connecting"));
   };
 
@@ -26,13 +29,13 @@ const HomePage = () => {
     if (client) {
       client.close();
     }
-  }
+  };
 
   const mqttPublish = (topic, payload) => {
     if (client) {
       webSocketPublish(client, topic, payload);
     }
-  }
+  };
 
   const mqttSub = (topic) => {
     if (client) {
@@ -50,17 +53,21 @@ const HomePage = () => {
   };
 
   useEffect(() => {
-    ws.current = new WebSocket("ws://127.0.0.1:4444");
+    ws.current = new WebSocket("ws://26.82.62.116:4444");
     ws.current.onopen = () => {
       console.log("ws opened");
     };
     ws.current.onclose = () => {
-      console.log("ws closed")
+      console.log("ws closed");
       dispatch(mqttAction.setConnectionStatus("Connect"));
     };
-    ws.current.onmessage = (message) => {
-      console.log(JSON.parse(message.data));
-      dispatch(mqttAction.setMqttPayload(JSON.parse(message.data)));
+    ws.current.onmessage = async (e) => {
+      let reader = new FileReader();
+      reader.onload = function () {
+        const data = JSON.parse(reader.result);
+        dispatch(mqttAction.setMqttPayload(data.payload));
+      };
+      reader.readAsText(e.data);
     };
 
     const wsCurrent = ws.current;
@@ -75,13 +82,19 @@ const HomePage = () => {
     <div className={styles.container}>
       <div className={styles.body}>
         <div className={styles.body_item}>
-          <Connector mqttConnect={mqttConnect} mqttDisconnect={mqttDisconnect} mqttSub={mqttSub} mqttUnSub={mqttUnSub} mqttPublish={mqttPublish}/>
+          <Connector
+            mqttConnect={mqttConnect}
+            mqttDisconnect={mqttDisconnect}
+            mqttSub={mqttSub}
+            mqttUnSub={mqttUnSub}
+            mqttPublish={mqttPublish}
+          />
         </div>
         <div className={styles.body_item}>
-          <Publisher mqttPublish={mqttPublish}/>
+          <Publisher mqttPublish={mqttPublish} />
         </div>
         <div className={styles.body_item}>
-          <TableData mqttPublish={mqttPublish}/>
+          <TableData mqttPublish={mqttPublish} />
         </div>
         {/* <div className={styles.body_item}>
           <ChartData isDrawChart={isDrawChart} setIsDrawChart={setIsDrawChart}/>

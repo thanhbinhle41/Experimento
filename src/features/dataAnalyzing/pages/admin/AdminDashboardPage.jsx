@@ -27,6 +27,7 @@ import { persistor } from "../../../../store/store";
 import { useNavigate } from "react-router";
 import ModalConfirmDeleteData from "../../components/admin/ModalConfirmDeleteData";
 import { webSocketPublish, webSocketSub } from "../../../../utils/webSocket";
+// import {Web}
 
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
@@ -61,7 +62,8 @@ const AdminDashboardPage = () => {
           type: "get-all-topic",
         },
       };
-      mqttPublish(clientMqtt, context);
+      // mqttPublish(clientMqtt, context);
+      webSocketPublish(clientMqtt, "admin", { type: "get-all-topic" });
     }
   };
   const handleDeleteDataBtn = async () => {
@@ -72,22 +74,27 @@ const AdminDashboardPage = () => {
     // const port = 8083;
     // const client = mqttConnect(host, port);
     // setClientMqtt(client);\
-    ws.current = new WebSocket("ws://26.223.247.195:4444");
+    ws.current = new WebSocket("ws://127.0.0.1:4444");
     ws.current.onopen = () => {
       console.log("ws opened");
       webSocketSub(ws.current, "admin");
       webSocketSub(ws.current, "AHA_B19DCCN123");
       dispatch(mqttAction.setConnectionStatus("Connected"));
       dispatch(mqttAction.setIsSubed(true));
+
       webSocketPublish(ws.current, "admin", { type: "get-all-topic" });
     };
     ws.current.onclose = () => {
       console.log("ws closed");
       dispatch(mqttAction.setConnectionStatus("Connect"));
     };
-    ws.current.onmessage = (message) => {
-      console.log(JSON.parse(message.data));
-      dispatch(mqttAction.setMqttPayload(JSON.parse(message.data)));
+    ws.current.onmessage = async (e) => {
+      let reader = new FileReader();
+      reader.onload = function () {
+        const data = JSON.parse(reader.result);
+        dispatch(mqttAction.setMqttPayload(data.payload));
+      };
+      reader.readAsText(e.data);
     };
 
     const wsCurrent = ws.current;
@@ -158,8 +165,10 @@ const AdminDashboardPage = () => {
       console.log(payload);
       const message = payload;
       if (message.type) {
+        console.log(message.type);
         switch (message.type) {
           case ONLINE: {
+            console.log("online cho: " + message.id);
             const id = message.id;
             const foundFunc = findTimeOutById(id);
             if (foundFunc === undefined) return;
@@ -180,7 +189,7 @@ const AdminDashboardPage = () => {
             };
             if (clientMqtt) {
               console.log(subscription);
-              mqttSub(clientMqtt, subscription, dispatch);
+              webSocketSub(clientMqtt, topicName);
               const context = {
                 topic: topicName,
                 qos: 0,
@@ -189,7 +198,7 @@ const AdminDashboardPage = () => {
                 },
               };
               console.log(context);
-              mqttPublish(clientMqtt, context);
+              webSocketPublish(clientMqtt, topicName, { type: "get-history" });
             }
             break;
           }
