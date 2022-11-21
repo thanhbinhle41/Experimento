@@ -2,8 +2,8 @@ import {React, useState} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./Publisher.module.scss";
 import { Button, Form, Input, Card } from "antd";
-import { dataAnalyzingActions } from "../../../features/dataAnalyzing/services/dataAnalyzingSlice";
-import { currentIDSelector } from "../../../features/auth/services/authSlice";
+import { dataAnalyzingActions } from "../../../dataAnalyzing/services/dataAnalyzingSlice";
+import { currentIDSelector } from "../../../auth/services/authSlice";
 
 const Publisher = ({ mqttPublish }) => {
   const dispatch = useDispatch();

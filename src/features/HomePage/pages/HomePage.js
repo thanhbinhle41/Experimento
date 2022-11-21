@@ -1,12 +1,11 @@
 import { React, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { ChartData } from "../../components/HomePage/ChartData/ChartData";
-import Connector from "../../components/HomePage/Connector/Connector";
-import Publisher from "../../components/HomePage/Publisher/Publisher";
-import { TableData } from "../../components/HomePage/TableData/TableData";
-import { mqttAction } from "../../services/mqtt/mqttSlice";
+import Connector from "../components/Connector/Connector";
+import Publisher from "../components/Publisher/Publisher";
+import { mqttAction } from "../../../services/mqtt/mqttSlice";
 import styles from "./HomePage.module.scss";
-import mqtt from "../../../node_modules/mqtt/dist/mqtt";
+import mqtt from "mqtt/dist/mqtt";
+import { TableData } from "../components/TableData/TableData";
 
 const HomePage = () => {
   const dispatch = useDispatch();

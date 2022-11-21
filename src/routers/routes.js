@@ -1,7 +1,8 @@
 import AdminAuthPage from "../features/auth/pages/admin/AdminAuthPage";
 import AdminDashboardPage from "../features/dataAnalyzing/pages/admin/AdminDashboardPage";
+import HomePage from "../features/HomePage/pages/HomePage";
 import PrivateRoutes from "./PrivateRoutes/PrivateRoutes";
-import HomePage from "../pages/HomePage/HomePage";
+
 
 const routes = [
   {

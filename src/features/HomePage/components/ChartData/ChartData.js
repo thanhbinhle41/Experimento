@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import LineChart from "../../LineChart/LineChart";
+import LineChart from "../../../../components/LineChart/LineChart";
 import { Card, Empty } from "antd";
 
 export const ChartData = ({isDrawChart, dataTable}) => {
