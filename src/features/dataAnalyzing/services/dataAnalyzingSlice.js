@@ -119,7 +119,7 @@ const dataAnalyzingSlice = createSlice({
       const {id, time} = action.payload;
       const foundData = state.dataExperiment.find((data) => data.id === id);
       if (foundData) {
-        const index = foundData.dataFromCOM.findInxe(item => item.time == time);
+        const index = foundData.dataFromCOM.findIndex(item => item.time === time);
         if (index !== -1) {
           foundData.dataFromCOM.splice(index, 1);
         }
