@@ -76,6 +76,7 @@ const dataAnalyzingSlice = createSlice({
       state.currentTopic = action.payload;
     },
     setOnlineById: (state, action) => {
+      console.log("set online id")
       const foundData = state.dataExperiment.find(
         (data) => data.id === action.payload
       );

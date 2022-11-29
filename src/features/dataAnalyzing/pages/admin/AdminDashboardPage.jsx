@@ -126,6 +126,8 @@ const AdminDashboardPage = () => {
       if (message.type) {
         switch (message.type) {
           case ONLINE: {
+            console.log("Online caseeeeee")
+            console.log(timeOutFuncArr);
             const id = message.id;
             const foundFunc = findTimeOutById(id);
             if (foundFunc === undefined) return;
@@ -147,6 +149,7 @@ const AdminDashboardPage = () => {
             if (clientMqtt) {
               console.log(subscription);
               mqttSub(clientMqtt, subscription, dispatch);
+              console.log("get history aaaa")
               const context = {
                 topic: topicName,
                 qos: 0,
