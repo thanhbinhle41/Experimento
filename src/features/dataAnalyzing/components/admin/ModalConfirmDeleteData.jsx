@@ -9,9 +9,8 @@ const ModalConfirmDeleteData = (props) => {
   const navigate = useNavigate();
 
   const handleDeleteDataBtn = async () => {
-    const purgePersistor = await persistor.purge();
+    await persistor.purge();
     navigate(0);
-    // console.log(purgePersistor);
   };
   const handleCancleBtn = () => {
     setIsShowConfirmDelete(false);

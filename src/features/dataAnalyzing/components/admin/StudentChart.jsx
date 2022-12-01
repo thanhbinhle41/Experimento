@@ -13,15 +13,15 @@ import React from "react";
 import { Scatter } from "react-chartjs-2";
 
 const StudentChart = (props) => {
-  const { dataTable } = props;
+  const { dataTable, xAxis, yAxis } = props;
   // Get array of distances
-  const labels = dataTable.map((data) => data.distance);
+  const labels = dataTable.map((data) => data[xAxis.toLowerCase()]);
 
   const columns = [
     {
       label: "Biểu đồ điện áp",
       // Get array of voltage
-      data: dataTable.map((data) => data.voltage),
+      data: dataTable.map((data) => data[yAxis.toLowerCase()]),
       borderColor: "rgb(255, 99, 132)",
       backgroundColor: "rgba(255, 99, 132, 0.5)",
       fill: false,
@@ -37,7 +37,7 @@ const StudentChart = (props) => {
       x: {
         title: {
           display: true,
-          text: "Khoảng cách",
+          text: xAxis,
         },
         min: 0,
         max: 30,
@@ -50,7 +50,7 @@ const StudentChart = (props) => {
       y: {
         title: {
           display: true,
-          text: "Điện áp",
+          text: yAxis,
         },
       },
     },

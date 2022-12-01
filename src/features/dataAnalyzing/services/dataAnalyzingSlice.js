@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { dataTypeConst } from "../utils/constants";
 
 const dataAnalyzingSlice = createSlice({
   name: "dataAnalyzing",
@@ -8,22 +9,11 @@ const dataAnalyzingSlice = createSlice({
       {
         id: "B19DCCN431",
         dataDistance: 30,
-        dataFromCOM: [
-          { data: { distance: 15, voltage: 20, time: "21-09-2001" } },
-          { data: { distance: 10, voltage: 10, time: "20-09-2001" } },
-          { data: { distance: 0, voltage: 0, time: "19-09-2001" } },
-        ],
-        isChosen: false,
-        isOnline: false,
-      },
-      {
-        id: "B19DCCN430",
-        dataDistance: 30,
-        dataFromCOM: [
-          { data: { distance: 15, voltage: 20, time: "21-09-2001" } },
-          { data: { distance: 10, voltage: 10, time: "20-09-2001" } },
-          { data: { distance: 0, voltage: 0, time: "19-09-2001" } },
-        ],
+        dataFromCOM: {
+          AV: [],
+          CV: [],
+          TV: [],
+        },
         isChosen: false,
         isOnline: false,
       },
@@ -52,7 +42,6 @@ const dataAnalyzingSlice = createSlice({
       );
     },
     addVoltageByID: (state, action) => {
-      console.log("addVoltageByID")
       const { ID, data } = action.payload;
       const item = state.dataExperiment.find((i) => i.id === ID);
       if (item === undefined) {
@@ -63,10 +52,8 @@ const dataAnalyzingSlice = createSlice({
           isChosen: false,
           isOnline: false,
         });
-        console.log("Create new data experiment");
       } else {
         item.dataFromCOM.unshift({ data: data });
-        console.log("Add data experiment");
       }
     },
     setCurrentDistance: (state, action) => {
@@ -76,7 +63,6 @@ const dataAnalyzingSlice = createSlice({
       state.currentTopic = action.payload;
     },
     setOnlineById: (state, action) => {
-      console.log("set online id")
       const foundData = state.dataExperiment.find(
         (data) => data.id === action.payload
       );
@@ -93,16 +79,26 @@ const dataAnalyzingSlice = createSlice({
       }
     },
     addData: (state, action) => {
-      const { id, dataHistory } = action.payload;
-      console.log(action.payload);
+      const { id, dataHistory, dataType } = action.payload;
       const foundData = state.dataExperiment.find((data) => data.id === id);
       if (foundData) {
-        foundData.dataFromCOM = dataHistory;
+        foundData.dataFromCOM[dataType] = dataHistory;
       } else {
         // new client
+        const dataFromCOM = {};
+        dataFromCOM[dataType] = dataHistory;
+        if (dataType !== dataTypeConst.AV) {
+          dataFromCOM[dataTypeConst.AV] = [];
+        }
+        if (dataType !== dataTypeConst.CV) {
+          dataFromCOM[dataTypeConst.CV] = [];
+        }
+        if (dataType !== dataTypeConst.TV) {
+          dataFromCOM[dataTypeConst.TV] = [];
+        }
         const newData = {
           id,
-          dataFromCOM: dataHistory,
+          dataFromCOM: dataFromCOM,
           isOnline: true,
           isChosen: false,
         };
@@ -110,22 +106,24 @@ const dataAnalyzingSlice = createSlice({
       }
     },
     resetDataByID: (state, action) => {
-      const {id} = action.payload;
+      const { id } = action.payload;
       const foundData = state.dataExperiment.find((data) => data.id === id);
       if (foundData) {
         foundData.dataFromCOM = [];
       }
     },
     deleteSingleDataById: (state, action) => {
-      const {id, time} = action.payload;
+      const { id, time } = action.payload;
       const foundData = state.dataExperiment.find((data) => data.id === id);
       if (foundData) {
-        const index = foundData.dataFromCOM.findIndex(item => item.time === time);
+        const index = foundData.dataFromCOM.findIndex(
+          (item) => item.time === time
+        );
         if (index !== -1) {
           foundData.dataFromCOM.splice(index, 1);
         }
       }
-    }
+    },
   },
 });
 

@@ -1,18 +1,25 @@
-import React, { useEffect, useState, useRef } from "react";
+import { DeleteOutlined } from "@ant-design/icons";
 import { Button, Card, Table } from "antd";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { dataAnalyzingActions, dataExperimentSelector } from "../../../dataAnalyzing/services/dataAnalyzingSlice";
-import { currentIDSelector } from "../../../auth/services/authSlice";
-import { mqttPayloadSelector } from "../../../../services/mqtt/mqttSlice";
-import { ChartData } from "../ChartData/ChartData";
 import { utils, writeFileXLSX } from "xlsx";
-import { DELETE_SINGLE_DATA_BY_ID, LIVE_DATA, RETURN_HISTORY } from "../../../../services/mqtt/mqttType";
-import { DeleteOutlined } from '@ant-design/icons';
+
+import { mqttPayloadSelector } from "../../../../services/mqtt/mqttSlice";
+import {
+  DELETE_SINGLE_DATA_BY_ID,
+  LIVE_DATA,
+  RETURN_HISTORY,
+} from "../../../../services/mqtt/mqttType";
+import { currentIDSelector } from "../../../auth/services/authSlice";
+import {
+  dataAnalyzingActions,
+  dataExperimentSelector,
+} from "../../../dataAnalyzing/services/dataAnalyzingSlice";
+import { ChartData } from "../ChartData/ChartData";
 import styles from "./TableData.module.scss";
 
-
-export const TableData = ({mqttPublish}) => {
-	const dispatch = useDispatch();
+export const TableData = ({ mqttPublish }) => {
+  const dispatch = useDispatch();
 
   const payloadMessage = useSelector(mqttPayloadSelector);
   const currentTopic = useSelector(currentIDSelector);
@@ -56,12 +63,12 @@ export const TableData = ({mqttPublish}) => {
       key: "time",
     },
     {
-      title: 'Tác vụ',
-      key: 'action',
+      title: "Tác vụ",
+      key: "action",
       render: (_, record) => (
         <div className={styles.actions_table}>
-            <a onClick={() => onDeleteSingleData(record)}>Delete</a>
-            <DeleteOutlined style={{"color": "red"}}/>
+          <a onClick={() => onDeleteSingleData(record)}>Delete</a>
+          <DeleteOutlined style={{ color: "red" }} />
         </div>
       ),
     },
@@ -70,13 +77,17 @@ export const TableData = ({mqttPublish}) => {
   const onDeleteSingleData = (item) => {
     const payload = {
       type: DELETE_SINGLE_DATA_BY_ID,
-      time: item.time
+      time: item.time,
     };
-    mqttPublish({ topic: currentTopic, qos: 0, payload: JSON.stringify(payload)});
-  }
+    mqttPublish({
+      topic: currentTopic,
+      qos: 0,
+      payload: JSON.stringify(payload),
+    });
+  };
 
-	useEffect(() => {
-		console.log("Socket return", payloadMessage);
+  useEffect(() => {
+    console.log("Socket return", payloadMessage);
     if (payloadMessage?.message?.type) {
       const message = payloadMessage.message;
       switch (message.type) {
@@ -90,7 +101,7 @@ export const TableData = ({mqttPublish}) => {
           break;
         }
         case RETURN_HISTORY: {
-          console.log("return history")
+          console.log("return history");
           const id = message.id;
           const dataHistory = message.data;
           dispatch(dataAnalyzingActions.addData({ id, dataHistory }));
@@ -104,14 +115,14 @@ export const TableData = ({mqttPublish}) => {
           break;
         }
         default:
-          break
+          break;
       }
     }
   }, [payloadMessage]);
 
   const onShowDataChart = () => {
     setIsDrawChart(true);
-  }
+  };
 
   const handleExportBtn = () => {
     const dataExcel = dataTable.reverse().map((data, index) => ({
@@ -141,8 +152,8 @@ export const TableData = ({mqttPublish}) => {
       >
         <Table columns={columns} dataSource={dataTable} />
       </Card>
-      <div style={{"paddingTop": "48px"}}>
-        <ChartData isDrawChart={isDrawChart} dataTable={dataTable}/>
+      <div style={{ paddingTop: "48px" }}>
+        <ChartData isDrawChart={isDrawChart} dataTable={dataTable} />
       </div>
     </div>
   );

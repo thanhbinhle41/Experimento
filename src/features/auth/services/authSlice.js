@@ -12,7 +12,6 @@ const authSlice = createSlice({
   reducers: {
     setIsAdmin: (state, action) => {
       state.isAdmin = action.payload;
-      console.log(action.payload);
     },
     setCurrentUserID: (state, action) => {
       state.currentID = action.payload;

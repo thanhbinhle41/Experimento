@@ -3,23 +3,23 @@ import mqtt from "mqtt/dist/mqtt";
 import { mqttAction } from "./mqttSlice";
 
 export const mqttConnect = (host, port, clientId = "admin") => {
-  const url = `ws://${host}:${port}/mqtt`;
-  const options = {
-    clientId: clientId,
-    // keepalive: 30,
-    protocolId: "MQTT",
-    protocolVersion: 4,
-    clean: true,
-    // reconnectPeriod: 1000,
-    // connectTimeout: 30 * 1000,
-    will: {
-      topic: "WillMsg",
-      payload: "Connection Closed abnormally..!",
-      qos: 0,
-      retain: false,
-    },
-    rejectUnauthorized: false,
-  };
+  const url = `wss://${host}:${port}/mqtt`;
+  // const options = {
+  //   clientId: clientId,
+  //   // keepalive: 30,
+  //   protocolId: "MQTT",
+  //   protocolVersion: 4,
+  //   clean: true,
+  //   // reconnectPeriod: 1000,
+  //   // connectTimeout: 30 * 1000,
+  //   will: {
+  //     topic: "WillMsg",
+  //     payload: "Connection Closed abnormally..!",
+  //     qos: 0,
+  //     retain: false,
+  //   },
+  //   rejectUnauthorized: false,
+  // };
 
   const client = mqtt.connect(url);
   return client;
@@ -34,7 +34,6 @@ export const mqttDisconnect = (client, dispatch) => {
 };
 
 export const mqttPublish = (client, context) => {
-  // console.log(client);
   if (client) {
     const { topic, qos, payload } = context;
     client.publish(topic, JSON.stringify(payload), { qos }, (error) => {
@@ -53,7 +52,7 @@ export const mqttSub = (client, subscription, dispatch) => {
         console.log("Subscribe to topics error", error);
         return;
       }
-      console.log("Topic subscribed: " + topic);
+      // console.log("Topic subscribed: " + topic);
       dispatch(mqttAction.setIsSubed(true));
     });
   }

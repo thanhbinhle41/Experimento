@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react";
-import LineChart from "../../../../components/LineChart/LineChart";
 import { Card, Empty } from "antd";
+import React from "react";
+
 import ScatterChart from "../../../../components/ScatterChart/ScatterChart";
 
-export const ChartData = ({isDrawChart, dataTable}) => {
-
+export const ChartData = ({ isDrawChart, dataTable }) => {
   // const [labels, setLabels] = useState([]);
 
-  
   const labels = dataTable ? dataTable.map((data) => data.distance) : [];
 
   const columnsChart = [
@@ -47,15 +45,16 @@ export const ChartData = ({isDrawChart, dataTable}) => {
 
   return (
     <Card title="Biểu đồ">
-      {isDrawChart ? 
+      {isDrawChart ? (
         <ScatterChart
           title="Line chart data"
           labels={labels}
           columns={columnsChart}
           options={options}
         />
-        : <Empty />
-      }
+      ) : (
+        <Empty />
+      )}
     </Card>
   );
 };

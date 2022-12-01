@@ -1,34 +1,33 @@
 import { Button, Card } from "antd";
 import React, { useEffect, useState } from "react";
-import AdminTable from "../../components/admin/AdminTable";
-import StudentData from "../../components/admin/StudentData";
-import {
-  dataAnalyzingActions,
-  dataExperimentSelector,
-} from "../../services/dataAnalyzingSlice";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  mqttConnect,
-  mqttSub,
-  mqttUnSub,
-  mqttPublish,
-} from "../../../../services/mqtt/mqttUtil";
+
 import {
   mqttAction,
   mqttPayloadSelector,
 } from "../../../../services/mqtt/mqttSlice";
 import {
+  GET_HISITORY,
+  LIVE_DATA,
   ONLINE,
   RETURN_HISTORY,
   RETURN_TOPIC,
-  LIVE_DATA,
 } from "../../../../services/mqtt/mqttType";
-import { persistor } from "../../../../store/store";
-import { useNavigate } from "react-router";
+import {
+  mqttConnect,
+  mqttPublish,
+  mqttSub,
+} from "../../../../services/mqtt/mqttUtil";
+import AdminTable from "../../components/admin/AdminTable";
 import ModalConfirmDeleteData from "../../components/admin/ModalConfirmDeleteData";
+import StudentData from "../../components/admin/StudentData";
+import {
+  dataAnalyzingActions,
+  dataExperimentSelector,
+} from "../../services/dataAnalyzingSlice";
+import { dataTypeConst } from "../../utils/constants";
 
 const AdminDashboardPage = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const dataExperiment = useSelector(dataExperimentSelector);
@@ -64,9 +63,40 @@ const AdminDashboardPage = () => {
   const handleDeleteDataBtn = async () => {
     setIsShowConfirmDelete(true);
   };
+
+  const getAllHistory = (topicName) => {
+    let context = {
+      topic: topicName,
+      qos: 0,
+      payload: {
+        type: GET_HISITORY,
+        message: dataTypeConst.AV,
+      },
+    };
+    mqttPublish(clientMqtt, context);
+    context = {
+      topic: topicName,
+      qos: 0,
+      payload: {
+        type: GET_HISITORY,
+        message: dataTypeConst.CV,
+      },
+    };
+    mqttPublish(clientMqtt, context);
+    context = {
+      topic: topicName,
+      qos: 0,
+      payload: {
+        type: GET_HISITORY,
+        message: dataTypeConst.TV,
+      },
+    };
+    mqttPublish(clientMqtt, context);
+  };
+
   useEffect(() => {
     const host = "broker.emqx.io";
-    const port = 8083;
+    const port = 8084;
     const client = mqttConnect(host, port);
     setClientMqtt(client);
   }, []);
@@ -80,7 +110,7 @@ const AdminDashboardPage = () => {
         }, 5000),
       }))
     );
-  }, [dataExperiment.length]);
+  }, [dataExperiment.length, dataExperiment, dispatch]);
 
   useEffect(() => {
     if (clientMqtt) {
@@ -99,7 +129,7 @@ const AdminDashboardPage = () => {
         dispatch(mqttAction.setMqttPayload(payload));
       });
     }
-  }, [clientMqtt]);
+  }, [clientMqtt, dispatch]);
 
   useEffect(() => {
     if (clientMqtt) {
@@ -117,17 +147,14 @@ const AdminDashboardPage = () => {
       };
       mqttPublish(clientMqtt, context);
     }
-  }, [clientMqtt]);
+  }, [clientMqtt, dispatch]);
 
   useEffect(() => {
     if (payload) {
-      console.log(payload);
       const message = payload.message;
       if (message.type) {
         switch (message.type) {
           case ONLINE: {
-            console.log("Online caseeeeee")
-            console.log(timeOutFuncArr);
             const id = message.id;
             const foundFunc = findTimeOutById(id);
             if (foundFunc === undefined) return;
@@ -147,27 +174,19 @@ const AdminDashboardPage = () => {
               qos: 0,
             };
             if (clientMqtt) {
-              console.log(subscription);
               mqttSub(clientMqtt, subscription, dispatch);
-              console.log("get history aaaa")
-              const context = {
-                topic: topicName,
-                qos: 0,
-                payload: {
-                  type: "get-history",
-                },
-              };
-              console.log(context);
-              mqttPublish(clientMqtt, context);
+              getAllHistory(topicName);
             }
             break;
           }
           case RETURN_HISTORY: {
-            console.log("Halo");
             const id = message.id;
             const dataHistory = message.data;
+            const dataType = message["data-type"];
 
-            dispatch(dataAnalyzingActions.addData({ id, dataHistory }));
+            dispatch(
+              dataAnalyzingActions.addData({ id, dataHistory, dataType })
+            );
             break;
           }
           case LIVE_DATA: {
@@ -179,6 +198,7 @@ const AdminDashboardPage = () => {
                 data,
               })
             );
+            break;
           }
 
           default:
@@ -186,7 +206,7 @@ const AdminDashboardPage = () => {
         }
       }
     }
-  }, [payload]);
+  }, [payload, clientMqtt, dispatch]);
 
   return (
     <>

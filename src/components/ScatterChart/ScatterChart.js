@@ -22,18 +22,18 @@ const ScatterChart = ({ title, labels, columns, options }) => {
     }
     */
 
-  const optionsBarChart = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: options?.position ? options.position : "top",
-      },
-      title: {
-        display: true,
-        text: title,
-      },
-    },
-  };
+  // const optionsBarChart = {
+  //   responsive: true,
+  //   plugins: {
+  //     legend: {
+  //       position: options?.position ? options.position : "top",
+  //     },
+  //     title: {
+  //       display: true,
+  //       text: title,
+  //     },
+  //   },
+  // };
   const dataBar = {
     labels: labels,
     datasets: columns,
