@@ -58,7 +58,7 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/React">
       <AppRoute />
     </BrowserRouter>
     // <div className="App">
