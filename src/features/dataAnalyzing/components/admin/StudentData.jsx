@@ -27,12 +27,12 @@ const StudentData = (props) => {
     !!dataById && selectedDataType
       ? dataById.dataFromCOM[selectedDataType]
       : [];
-  dataTable = dataTable.map((item, index) => ({
+  dataTable = Array.isArray(dataTable) ? dataTable.map((item, index) => ({
     // ...item,
     ...item,
     index: index + 1,
     key: item.time,
-  }));
+  })) : [];
   // const dataExcel = [];
   const getDataExcel = () => {
     let dataExcel = [];
@@ -91,7 +91,7 @@ const StudentData = (props) => {
   };
   const menuItems = [
     {
-      label: "Ampe - Voltage",
+      label: "Voltage - Ampe",
       key: dataTypeConst.AV,
     },
     {

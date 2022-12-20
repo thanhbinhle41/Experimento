@@ -1,26 +1,22 @@
 import { Button, Form, Input } from "antd";
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   authSliceActions,
-  passwordAdminSelector,
-  usernameAdminSelector,
 } from "../../services/authSlice";
 
 const AdminAuth = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const usernameAdmin = useSelector(usernameAdminSelector);
-  const passwordAdmin = useSelector(passwordAdminSelector);
-
   const onFinish = (values) => {
-    const { username, password } = values;
-    if (username === usernameAdmin && passwordAdmin === password) {
-      dispatch(authSliceActions.setIsAdmin(true));
-      navigate("/admin/dashboard");
-    }
+    const { username } = values;
+    dispatch(authSliceActions.setIsAdmin(true));
+    dispatch(authSliceActions.setUsernameAdmin(username));
+
+    navigate("/admin/dashboard");
+
   };
 
   const onFinishFailed = (errorInfo) => {
@@ -44,13 +40,13 @@ const AdminAuth = () => {
         <Input />
       </Form.Item>
 
-      <Form.Item
+      {/* <Form.Item
         label="Password"
         name="password"
         rules={[{ required: true, message: "Please input your password!" }]}
       >
         <Input.Password />
-      </Form.Item>
+      </Form.Item> */}
 
       <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
         <Button type="primary" htmlType="submit">

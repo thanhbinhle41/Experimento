@@ -5,19 +5,7 @@ const dataAnalyzingSlice = createSlice({
   name: "dataAnalyzing",
   initialState: {
     currentDistance: 0,
-    dataExperiment: [
-      {
-        id: "B19DCCN431",
-        dataDistance: 30,
-        dataFromCOM: {
-          AV: [],
-          CV: [],
-          TV: [],
-        },
-        isChosen: false,
-        isOnline: false,
-      },
-    ],
+    dataExperiment: [],
   },
   reducers: {
     toggleChosenSatusById: (state, action) => {
@@ -33,7 +21,6 @@ const dataAnalyzingSlice = createSlice({
       foundData.isChosen = false;
     },
     setChosenByListid: (state, action) => {
-      // const { listId, value } = action.payload;
       const listId = action.payload;
       state.dataExperiment.map((item) =>
         listId.includes(item.id)

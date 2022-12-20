@@ -1,6 +1,7 @@
 import { Button, Card } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import './AdminDashboardPage.scss'
 
 import {
   mqttAction,
@@ -25,13 +26,17 @@ import {
   dataAnalyzingActions,
   dataExperimentSelector,
 } from "../../services/dataAnalyzingSlice";
+import { authSliceActions, usernameAdminSelector } from "../../../auth/services/authSlice";
 import { dataTypeConst } from "../../utils/constants";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboardPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const dataExperiment = useSelector(dataExperimentSelector);
   const payload = useSelector(mqttPayloadSelector);
+  const userAdmin = useSelector(usernameAdminSelector);
 
   const [clientMqtt, setClientMqtt] = useState(null);
   const [timeOutFuncArr, setTimeOutFuncArr] = useState([]);
@@ -110,6 +115,7 @@ const AdminDashboardPage = () => {
         }, 5000),
       }))
     );
+    // eslint-disable-next-line
   }, [dataExperiment.length, dataExperiment, dispatch]);
 
   useEffect(() => {
@@ -129,17 +135,18 @@ const AdminDashboardPage = () => {
         dispatch(mqttAction.setMqttPayload(payload));
       });
     }
+    // eslint-disable-next-line
   }, [clientMqtt, dispatch]);
 
   useEffect(() => {
     if (clientMqtt) {
       const subscription = {
-        topic: "admin",
+        topic: userAdmin,
         qos: 0,
       };
       mqttSub(clientMqtt, subscription, dispatch);
       const context = {
-        topic: "admin",
+        topic: userAdmin,
         qos: 0,
         payload: {
           type: "get-all-topic",
@@ -147,6 +154,7 @@ const AdminDashboardPage = () => {
       };
       mqttPublish(clientMqtt, context);
     }
+    // eslint-disable-next-line
   }, [clientMqtt, dispatch]);
 
   useEffect(() => {
@@ -206,7 +214,30 @@ const AdminDashboardPage = () => {
         }
       }
     }
+    // eslint-disable-next-line
   }, [payload, clientMqtt, dispatch]);
+
+  const onLogout = () => {
+    dispatch(authSliceActions.setIsAdmin(false));
+    dispatch(authSliceActions.setUsernameAdmin(""));
+
+    navigate("/admin/login");
+  }
+
+  const renderHeader = () => {
+    return(
+      <div className="header_admin_page">
+        <a href="#default" className="logo">Danh sách máy</a>
+        <div className="user_info">
+          <div>
+            Mã phòng: 
+            <span className="user_name">{userAdmin}</span>
+          </div>
+          <Button type="primary" danger onClick={onLogout}>Đăng xuất</Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -226,7 +257,7 @@ const AdminDashboardPage = () => {
             Xóa data
           </Button>,
         ]}
-        title="Danh sách máy"
+        title={renderHeader()}
       >
         <AdminTable />
       </Card>

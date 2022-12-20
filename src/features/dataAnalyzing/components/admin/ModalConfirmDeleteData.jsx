@@ -10,7 +10,7 @@ const ModalConfirmDeleteData = (props) => {
 
   const handleDeleteDataBtn = async () => {
     await persistor.purge();
-    navigate(0);
+    navigate("/admin/login");
   };
   const handleCancleBtn = () => {
     setIsShowConfirmDelete(false);
@@ -25,7 +25,7 @@ const ModalConfirmDeleteData = (props) => {
       okText="Xác nhận"
       cancelText="Hủy"
     >
-      Xóa thông tin hiện tại đang có?
+      Xóa tất cả các thông tin hiện tại đang có và đăng xuất?
     </Modal>
   );
 };
