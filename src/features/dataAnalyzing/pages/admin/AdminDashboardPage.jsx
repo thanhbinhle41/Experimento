@@ -16,6 +16,7 @@ import {
 } from "../../../../services/mqtt/mqttType";
 import {
   mqttConnect,
+  mqttDisconnect,
   mqttPublish,
   mqttSub,
 } from "../../../../services/mqtt/mqttUtil";
@@ -107,7 +108,11 @@ const AdminDashboardPage = () => {
     const port = 8084;
     const client = mqttConnect(host, port);
     setClientMqtt(client);
-  }, []);
+
+    return () => {
+      mqttDisconnect(client, dispatch);
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     setTimeOutFuncArr(
@@ -163,13 +168,11 @@ const AdminDashboardPage = () => {
   useEffect(() => {
     if (payload) {
       const message = payload.message;
-      console.log(message);
       if (message.type) {
         switch (message.type) {
           case ONLINE: {
             const id = message.id;
             const foundFunc = findTimeOutById(id);
-            console.log(foundFunc);
             if (foundFunc === undefined) return;
             dispatch(dataAnalyzingActions.setOnlineById(id));
             if (foundFunc.timeout) {

@@ -1,12 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { dataTypeConst } from "../utils/constants";
+import { PURGE } from "redux-persist";
+
+const initialState = {
+  currentDistance: 0,
+  dataExperiment: [],
+};
 
 const dataAnalyzingSlice = createSlice({
   name: "dataAnalyzing",
-  initialState: {
-    currentDistance: 0,
-    dataExperiment: [],
-  },
+  initialState,
   reducers: {
     toggleChosenSatusById: (state, action) => {
       const foundData = state.dataExperiment.find(
@@ -111,6 +114,11 @@ const dataAnalyzingSlice = createSlice({
         }
       }
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(PURGE, (state) => {
+      state.dataExperiment = [];
+    });
   },
 });
 
