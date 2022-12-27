@@ -1,4 +1,5 @@
 import { Modal } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
 import React from "react";
 import { useNavigate } from "react-router";
 import { persistor } from "../../../../store/store";
@@ -22,6 +23,19 @@ const ModalConfirmDeleteData = (props) => {
       open={isShowConfirmDelete}
       onOk={handleDeleteDataBtn}
       onCancel={handleCancleBtn}
+      closeIcon={
+        <div
+          style={{
+            height: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            fontSize: "15px",
+          }}
+        >
+          <CloseOutlined />
+        </div>
+      }
       okText="Xác nhận"
       cancelText="Hủy"
     >
