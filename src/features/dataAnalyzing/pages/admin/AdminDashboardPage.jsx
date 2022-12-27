@@ -1,7 +1,7 @@
 import { Button, Card } from "antd";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import './AdminDashboardPage.scss'
+import "./AdminDashboardPage.scss";
 
 import {
   mqttAction,
@@ -26,7 +26,10 @@ import {
   dataAnalyzingActions,
   dataExperimentSelector,
 } from "../../services/dataAnalyzingSlice";
-import { authSliceActions, usernameAdminSelector } from "../../../auth/services/authSlice";
+import {
+  authSliceActions,
+  usernameAdminSelector,
+} from "../../../auth/services/authSlice";
 import { dataTypeConst } from "../../utils/constants";
 import { useNavigate } from "react-router-dom";
 
@@ -116,7 +119,7 @@ const AdminDashboardPage = () => {
       }))
     );
     // eslint-disable-next-line
-  }, [dataExperiment.length, dataExperiment, dispatch]);
+  }, [dataExperiment.length, dispatch]);
 
   useEffect(() => {
     if (clientMqtt) {
@@ -160,11 +163,13 @@ const AdminDashboardPage = () => {
   useEffect(() => {
     if (payload) {
       const message = payload.message;
+      console.log(message);
       if (message.type) {
         switch (message.type) {
           case ONLINE: {
             const id = message.id;
             const foundFunc = findTimeOutById(id);
+            console.log(foundFunc);
             if (foundFunc === undefined) return;
             dispatch(dataAnalyzingActions.setOnlineById(id));
             if (foundFunc.timeout) {
@@ -222,22 +227,26 @@ const AdminDashboardPage = () => {
     dispatch(authSliceActions.setUsernameAdmin(""));
 
     navigate("/admin/login");
-  }
+  };
 
   const renderHeader = () => {
-    return(
+    return (
       <div className="header_admin_page">
-        <a href="#default" className="logo">Danh sách máy</a>
+        <a href="#default" className="logo">
+          Danh sách máy
+        </a>
         <div className="user_info">
           <div>
-            Mã phòng: 
+            Mã phòng:
             <span className="user_name">{userAdmin}</span>
           </div>
-          <Button type="primary" danger onClick={onLogout}>Đăng xuất</Button>
+          <Button type="primary" danger onClick={onLogout}>
+            Đăng xuất
+          </Button>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <>
