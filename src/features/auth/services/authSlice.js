@@ -1,10 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { PURGE } from "redux-persist";
 
 const authSlice = createSlice({
   name: "auth",
   initialState: {
     usernameAdmin: "admin",
-    passwordAdmin: "123456",
     isAdmin: true,
     studentID: [], // [{}]
     currentID: null,
@@ -12,11 +12,19 @@ const authSlice = createSlice({
   reducers: {
     setIsAdmin: (state, action) => {
       state.isAdmin = action.payload;
-      console.log(action.payload);
     },
     setCurrentUserID: (state, action) => {
       state.currentID = action.payload;
     },
+    setUsernameAdmin: (state, action) => {
+      state.usernameAdmin = action.payload;
+    },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(PURGE, (state) => {
+      state.usernameAdmin = "admin";
+      state.isAdmin = false;
+    });
   },
 });
 
@@ -25,6 +33,5 @@ export default authSlice;
 export const authSliceActions = authSlice.actions;
 
 export const usernameAdminSelector = (state) => state.auth.usernameAdmin;
-export const passwordAdminSelector = (state) => state.auth.passwordAdmin;
 export const isAdminSelector = (state) => state.auth.isAdmin;
 export const currentIDSelector = (state) => state.auth.currentID;

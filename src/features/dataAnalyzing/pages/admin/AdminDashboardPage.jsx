@@ -1,38 +1,46 @@
 import { Button, Card } from "antd";
 import React, { useEffect, useState } from "react";
-import AdminTable from "../../components/admin/AdminTable";
-import StudentData from "../../components/admin/StudentData";
-import {
-  dataAnalyzingActions,
-  dataExperimentSelector,
-} from "../../services/dataAnalyzingSlice";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  mqttConnect,
-  mqttSub,
-  mqttUnSub,
-  mqttPublish,
-} from "../../../../services/mqtt/mqttUtil";
+import "./AdminDashboardPage.scss";
+
 import {
   mqttAction,
   mqttPayloadSelector,
 } from "../../../../services/mqtt/mqttSlice";
 import {
+  GET_HISITORY,
+  LIVE_DATA,
   ONLINE,
   RETURN_HISTORY,
   RETURN_TOPIC,
-  LIVE_DATA,
 } from "../../../../services/mqtt/mqttType";
-import { persistor } from "../../../../store/store";
-import { useNavigate } from "react-router";
+import {
+  mqttConnect,
+  mqttDisconnect,
+  mqttPublish,
+  mqttSub,
+} from "../../../../services/mqtt/mqttUtil";
+import AdminTable from "../../components/admin/AdminTable";
 import ModalConfirmDeleteData from "../../components/admin/ModalConfirmDeleteData";
+import StudentData from "../../components/admin/StudentData";
+import {
+  dataAnalyzingActions,
+  dataExperimentSelector,
+} from "../../services/dataAnalyzingSlice";
+import {
+  authSliceActions,
+  usernameAdminSelector,
+} from "../../../auth/services/authSlice";
+import { dataTypeConst } from "../../utils/constants";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboardPage = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const dataExperiment = useSelector(dataExperimentSelector);
   const payload = useSelector(mqttPayloadSelector);
+  const userAdmin = useSelector(usernameAdminSelector);
 
   const [clientMqtt, setClientMqtt] = useState(null);
   const [timeOutFuncArr, setTimeOutFuncArr] = useState([]);
@@ -64,12 +72,47 @@ const AdminDashboardPage = () => {
   const handleDeleteDataBtn = async () => {
     setIsShowConfirmDelete(true);
   };
+
+  const getAllHistory = (topicName) => {
+    let context = {
+      topic: topicName,
+      qos: 0,
+      payload: {
+        type: GET_HISITORY,
+        message: dataTypeConst.AV,
+      },
+    };
+    mqttPublish(clientMqtt, context);
+    context = {
+      topic: topicName,
+      qos: 0,
+      payload: {
+        type: GET_HISITORY,
+        message: dataTypeConst.CV,
+      },
+    };
+    mqttPublish(clientMqtt, context);
+    context = {
+      topic: topicName,
+      qos: 0,
+      payload: {
+        type: GET_HISITORY,
+        message: dataTypeConst.TV,
+      },
+    };
+    mqttPublish(clientMqtt, context);
+  };
+
   useEffect(() => {
     const host = "broker.emqx.io";
-    const port = 8083;
+    const port = 8084;
     const client = mqttConnect(host, port);
     setClientMqtt(client);
-  }, []);
+
+    return () => {
+      mqttDisconnect(client, dispatch);
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     setTimeOutFuncArr(
@@ -80,7 +123,8 @@ const AdminDashboardPage = () => {
         }, 5000),
       }))
     );
-  }, [dataExperiment.length]);
+    // eslint-disable-next-line
+  }, [dataExperiment.length, dispatch]);
 
   useEffect(() => {
     if (clientMqtt) {
@@ -99,17 +143,18 @@ const AdminDashboardPage = () => {
         dispatch(mqttAction.setMqttPayload(payload));
       });
     }
-  }, [clientMqtt]);
+    // eslint-disable-next-line
+  }, [clientMqtt, dispatch]);
 
   useEffect(() => {
     if (clientMqtt) {
       const subscription = {
-        topic: "admin",
+        topic: userAdmin,
         qos: 0,
       };
       mqttSub(clientMqtt, subscription, dispatch);
       const context = {
-        topic: "admin",
+        topic: userAdmin,
         qos: 0,
         payload: {
           type: "get-all-topic",
@@ -117,17 +162,15 @@ const AdminDashboardPage = () => {
       };
       mqttPublish(clientMqtt, context);
     }
-  }, [clientMqtt]);
+    // eslint-disable-next-line
+  }, [clientMqtt, dispatch]);
 
   useEffect(() => {
     if (payload) {
-      console.log(payload);
       const message = payload.message;
       if (message.type) {
         switch (message.type) {
           case ONLINE: {
-            console.log("Online caseeeeee")
-            console.log(timeOutFuncArr);
             const id = message.id;
             const foundFunc = findTimeOutById(id);
             if (foundFunc === undefined) return;
@@ -147,27 +190,19 @@ const AdminDashboardPage = () => {
               qos: 0,
             };
             if (clientMqtt) {
-              console.log(subscription);
               mqttSub(clientMqtt, subscription, dispatch);
-              console.log("get history aaaa")
-              const context = {
-                topic: topicName,
-                qos: 0,
-                payload: {
-                  type: "get-history",
-                },
-              };
-              console.log(context);
-              mqttPublish(clientMqtt, context);
+              getAllHistory(topicName);
             }
             break;
           }
           case RETURN_HISTORY: {
-            console.log("Halo");
             const id = message.id;
             const dataHistory = message.data;
+            const dataType = message["data-type"];
 
-            dispatch(dataAnalyzingActions.addData({ id, dataHistory }));
+            dispatch(
+              dataAnalyzingActions.addData({ id, dataHistory, dataType })
+            );
             break;
           }
           case LIVE_DATA: {
@@ -179,6 +214,7 @@ const AdminDashboardPage = () => {
                 data,
               })
             );
+            break;
           }
 
           default:
@@ -186,7 +222,34 @@ const AdminDashboardPage = () => {
         }
       }
     }
-  }, [payload]);
+    // eslint-disable-next-line
+  }, [payload, clientMqtt, dispatch]);
+
+  const onLogout = () => {
+    dispatch(authSliceActions.setIsAdmin(false));
+    dispatch(authSliceActions.setUsernameAdmin(""));
+
+    navigate("/admin/login");
+  };
+
+  const renderHeader = () => {
+    return (
+      <div className="header_admin_page">
+        <a href="#default" className="logo">
+          Danh sách máy
+        </a>
+        <div className="user_info">
+          <div>
+            Mã phòng:
+            <span className="user_name">{userAdmin}</span>
+          </div>
+          <Button type="primary" danger onClick={onLogout}>
+            Đăng xuất
+          </Button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -206,7 +269,7 @@ const AdminDashboardPage = () => {
             Xóa data
           </Button>,
         ]}
-        title="Danh sách máy"
+        title={renderHeader()}
       >
         <AdminTable />
       </Card>

@@ -15,7 +15,7 @@ const reducers = combineReducers({
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["dataAnalyzing"],
+  whitelist: ["dataAnalyzing", "auth"],
 };
 
 const persistedReducer = persistReducer(persistConfig, reducers);

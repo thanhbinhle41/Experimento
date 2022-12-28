@@ -1,13 +1,11 @@
-import { Button, Table, Tag } from "antd";
-import ColumnGroup from "antd/lib/table/ColumnGroup";
+import { Table, Tag } from "antd";
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+
 import { dataExperimentSelector } from "../../services/dataAnalyzingSlice";
 import { dataAnalyzingActions } from "../../services/dataAnalyzingSlice.js";
 
 const AdminTable = (props) => {
-  const { isShowStudentData, setIsShowStudentData } = props;
-
   const dispatch = useDispatch();
 
   let dataExperiment = useSelector(dataExperimentSelector);
@@ -16,14 +14,6 @@ const AdminTable = (props) => {
   const selectedRowKeys = dataTable
     .filter((data) => data.isChosen === true)
     .map((data) => data.id);
-
-  const handleShowBtnOnClick = (id) => {
-    console.log(id);
-    const arrWithStatusChange = isShowStudentData.map((item) =>
-      item.id === id ? { ...item, isShowData: !item.isShowData } : item
-    );
-    setIsShowStudentData(arrWithStatusChange);
-  };
 
   const columns = [
     // {
